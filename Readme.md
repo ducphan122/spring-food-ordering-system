@@ -1,4 +1,5 @@
 ## order-service
+- OrderItem, Order is implemented with builder pattern that allows for the step-by-step construction of complex objects. Can be created with Lombok @Builder annotation, but because it is in domain layer, we dont want any dependency on any framework or library, so we implement it manually.
 
 ## Others
 - we use mvn clean install to build and install the jar file to the local maven repository
