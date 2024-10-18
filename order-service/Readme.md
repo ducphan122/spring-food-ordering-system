@@ -29,5 +29,30 @@
 - It is used to create single runnable jar files and run as microservice
 - It also contains the docker file to build docker image to use it in cloud deployment
 
+## Order State changing status
+Order States and Transitions
+- Pending
+Purpose: Initial state when an order is created. Indicates that the order is awaiting payment.
+Transitions:
+To Paid: When payment is successful.
+To Canceled: If payment fails.
 
+- Paid
+Purpose: Indicates that payment has been successfully received for the order. The order is now awaiting restaurant approval.
+Transitions:
+To Approved: When the restaurant approves the order.
+To Canceling: If restaurant approval fails and a payment rollback is required.
+
+- Approved
+Purpose: Confirms that the restaurant has approved the order. The order can now proceed to fulfillment.
+
+- Canceling
+Purpose: Represents that a cancellation process has been initiated. This state is used when a payment rollback is necessary due to failed approval from restaurant.
+Transitions:
+To Canceled: After successful rollback of the payment (order service must inform payment service to rollback the payment). Using SAGA pattern for compensation.
+
+- Canceled
+Purpose: Final state indicating that the order has been canceled. This can occur either due to payment failure or after a successful cancellation process.
+Transitions:
+(Terminal State)
 
