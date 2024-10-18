@@ -56,3 +56,9 @@ Purpose: Final state indicating that the order has been canceled. This can occur
 Transitions:
 (Terminal State)
 
+## Order Events
+- OrderCreatedEvent
+- OrderPaidEvent
+- OrderCancelledEvent: use to rollback the payment if the restaurant did not approve the order. After setting the order status to CANCELLING, we need to fire the OrderCancelledEvent to rollback the payment.
+- We dont need to fire OrderApprovedEvent because the clients will fetch the data using tracking id. If we have a client that has capable of capturing the approved event, we can fire the event that can be consumed by that client to continue delivery process. The client as an event consumer. However, in the current design we dont have any client that is capable of capturing the approved event because we just use simple http client with Postman. Moreover, because this is last step in order processing
+
