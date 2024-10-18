@@ -62,3 +62,12 @@ Transitions:
 - OrderCancelledEvent: use to rollback the payment if the restaurant did not approve the order. After setting the order status to CANCELLING, we need to fire the OrderCancelledEvent to rollback the payment.
 - We dont need to fire OrderApprovedEvent because the clients will fetch the data using tracking id. If we have a client that has capable of capturing the approved event, we can fire the event that can be consumed by that client to continue delivery process. The client as an event consumer. However, in the current design we dont have any client that is capable of capturing the approved event because we just use simple http client with Postman. Moreover, because this is last step in order processing
 
+## Ports and Adapters
+
+Input Ports:
+- OrderApplicationService is the input port, clients will use it (exp: Postman)
+- PaymentResponseMessageListener and RestaurantApprovalResponseMessageListener are the input ports - message listeners for payment and restaurant approvals. They are triggered by domain events. Payment or Restaurant service will raise the domain events and they will trigger the message listeners input port in the order service
+
+Output Ports:
+- OrderCreatedPaymentRequestMessagePublisher, OrderCancelledPaymentRequestMessagePublisher, OrderPaidRestaurantRequestMessagePublisher are the message publisher output ports to publish 3 types of events in order domain logic
+
