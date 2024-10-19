@@ -65,7 +65,7 @@ Transitions:
 ## Ports and Adapters
 
 Input Ports:
-- OrderApplicationService is the input port, clients will use it (exp: Postman)
+- OrderApplicationService is the input port, clients will use it (exp: Postman). -> OrderApplicationServiceImpl 
 - PaymentResponseMessageListener and RestaurantApprovalResponseMessageListener are the input ports - message listeners for payment and restaurant approvals. They are triggered by domain events. Payment or Restaurant service will raise the domain events and they will trigger the message listeners input port in the order service
 
 Output Ports:
