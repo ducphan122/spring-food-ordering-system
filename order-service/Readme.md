@@ -71,3 +71,9 @@ Input Ports:
 Output Ports:
 - OrderCreatedPaymentRequestMessagePublisher, OrderCancelledPaymentRequestMessagePublisher, OrderPaidRestaurantRequestMessagePublisher are the message publisher output ports to publish 3 types of events in order domain logic
 
+## Event Publisher
+- OrderApplicationServiceImpl call OrderCreateCommandHandler to create order. After saving order to database, OrderCreateCommandHandler will publish OrderCreatedEvent. In some cases, we can also use spring transactional event listener to automatically publish the event after transaction is committed.
+
+## Event Listener
+- PaymentResponseMessageListenerImpl and RestaurantApprovalResponseMessageListenerImpl are the event listeners for payment and restaurant approval responses. They are triggered by the domain events from other bounded contexts (payment and restaurant service). 
+- Will be implemented in saga pattern
