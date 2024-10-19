@@ -87,18 +87,13 @@
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>2.43.0</version>
                 <configuration>
-                    <!-- optional: limit format enforcement to just the files changed by this
-                    feature branch -->
-                    <!-- <ratchetFrom>origin/main</ratchetFrom> -->
                     <formats>
-                        <!-- you can define as many formats as you want, each is independent -->
+                        <!-- define a global format -->
                         <format>
-                            <!-- define the files to apply to -->
                             <includes>
                                 <include>.gitattributes</include>
                                 <include>.gitignore</include>
                             </includes>
-                            <!-- define the steps to apply to those files -->
                             <trimTrailingWhitespace />
                             <endWithNewline />
                             <indent>
@@ -109,24 +104,11 @@
                     </formats>
                     <!-- define a language-specific format -->
                     <java>
-                        <!-- no need to specify files, inferred automatically, but you can if you
-                        want -->
-
-                        <!-- apply a specific flavor of google-java-format and reflow long strings -->
-                        <googleJavaFormat>
-                            <version>1.17.0</version>
-                            <style>AOSP</style>
-                            <reflowLongStrings>true</reflowLongStrings>
-                            <formatJavadoc>false</formatJavadoc>
-                        </googleJavaFormat>
-
-                        <!-- make sure every file has the following copyright header.
-                      optionally, Spotless can set copyright years by digging
-                      through git history (see "license" section below) -->
-                        <licenseHeader>
-                            <content>/* (C)$YEAR */</content>  <!-- or
-                            <file>${project.basedir}/license-header</file> -->
-                        </licenseHeader>
+                        <importOrder />
+                        <removeUnusedImports />
+                        <toggleOffOn />
+                        <formatAnnotations />
+                        <palantirJavaFormat />
                     </java>
                 </configuration>
             </plugin>

@@ -1,3 +1,4 @@
+/* (C)2024 */
 package com.spring.food.ordering.system.order.service.domain.entity;
 
 import com.spring.food.ordering.system.domain.entity.BaseEntity;
@@ -5,29 +6,29 @@ import com.spring.food.ordering.system.domain.valueobject.Money;
 import com.spring.food.ordering.system.domain.valueobject.ProductId;
 
 public class Product extends BaseEntity<ProductId> {
-  private String name;
-  private Money price;
+    private String name;
+    private Money price;
 
-  public Product(ProductId productId, String name, Money price) {
-    super.setId(productId);
-    this.name = name;
-    this.price = price;
-  } 
+    public Product(ProductId productId, String name, Money price) {
+        super.setId(productId);
+        this.name = name;
+        this.price = price;
+    }
 
-  public Product(ProductId productId) {
-    super.setId(productId);
-  }
+    public Product(ProductId productId) {
+        super.setId(productId);
+    }
 
-  public void updateWithConfirmedNameAndPrice(String name, Money price) {
-    this.name = name;
-    this.price = price;
-  }
+    public void updateWithConfirmedNameAndPrice(String name, Money price) {
+        this.name = name;
+        this.price = price;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public Money getPrice() {
-    return price;
-  }
+    public Money getPrice() {
+        return price;
+    }
 }

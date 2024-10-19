@@ -1,57 +1,56 @@
+/* (C)2024 */
 package com.spring.food.ordering.system.order.service.domain.entity;
 
 import com.spring.food.ordering.system.domain.entity.AggregateRoot;
 import com.spring.food.ordering.system.domain.valueobject.RestaurantId;
-
 import java.util.List;
 
 public class Restaurant extends AggregateRoot<RestaurantId> {
-  private final List<Product> products;
-  private boolean active;
-
-  private Restaurant(Builder builder) {
-    super.setId(builder.restaurantId);
-    products = builder.products;
-    active = builder.active;
-  }
-
-  public static Builder builder() {
-    return new Builder();
-  }
-
-  public List<Product> getProducts() {
-    return products;
-  }
-
-  public boolean isActive() {
-    return active;
-  }
-
-  public static final class Builder {
-    private RestaurantId restaurantId;
-    private List<Product> products;
+    private final List<Product> products;
     private boolean active;
 
-    private Builder() {
+    private Restaurant(Builder builder) {
+        super.setId(builder.restaurantId);
+        products = builder.products;
+        active = builder.active;
     }
 
-    public Builder restaurantId(RestaurantId val) {
-      restaurantId = val;
-      return this;
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public Builder products(List<Product> val) {
-      products = val;
-      return this;
+    public List<Product> getProducts() {
+        return products;
     }
 
-    public Builder active(boolean val) {
-      active = val;
-      return this;
+    public boolean isActive() {
+        return active;
     }
 
-    public Restaurant build() {
-      return new Restaurant(this);
+    public static final class Builder {
+        private RestaurantId restaurantId;
+        private List<Product> products;
+        private boolean active;
+
+        private Builder() {}
+
+        public Builder restaurantId(RestaurantId val) {
+            restaurantId = val;
+            return this;
+        }
+
+        public Builder products(List<Product> val) {
+            products = val;
+            return this;
+        }
+
+        public Builder active(boolean val) {
+            active = val;
+            return this;
+        }
+
+        public Restaurant build() {
+            return new Restaurant(this);
+        }
     }
-  }
 }

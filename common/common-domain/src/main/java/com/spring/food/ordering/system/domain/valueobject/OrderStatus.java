@@ -1,5 +1,10 @@
+/* (C)2024 */
 package com.spring.food.ordering.system.domain.valueobject;
 
 public enum OrderStatus {
-  PENDING, PAID, APPROVED, CANCELLING, CANCELLED
+    PENDING,
+    PAID,
+    APPROVED,
+    CANCELLING,
+    CANCELLED
 }
