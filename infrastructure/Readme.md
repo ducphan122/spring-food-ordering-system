@@ -9,3 +9,5 @@ Command:
 Steps:
 - after running all dockers, open localhost:9000
 - add cluster with name spring-food-ordering-system, cluster Zookeeper hosts zookeeper:2181
+
+## Kafka
