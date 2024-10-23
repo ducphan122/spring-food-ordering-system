@@ -11,3 +11,9 @@ Steps:
 - add cluster with name spring-food-ordering-system, cluster Zookeeper hosts zookeeper:2181
 
 ## Kafka
+
+### Kafka Model
+- we are using avro to serialize and deserialize the messages.
+- the avro schema is defined in the kafka-model/src/main/resources/avro/
+- the avro schema is used to generate the java classes that will be used to serialize and deserialize the messages.
+- the java classes are generated using the maven plugin avro-maven-plugin, with sourceDirectory and outputDirectory. To generate the java classes, run the command: mvn clean install (at kafka-model folder or at root).
