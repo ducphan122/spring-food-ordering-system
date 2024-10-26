@@ -13,7 +13,7 @@
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
         <groupId>org.springframework.boot</groupId>
-        <version>3.3.2</version>
+        <version>3.3.5</version>
         <relativePath />
     </parent>
 
@@ -60,6 +60,11 @@
             <dependency>
                 <groupId>com.spring.food.ordering.system</groupId>
                 <artifactId>common-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.spring.food.ordering.system</groupId>
+                <artifactId>common-application</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

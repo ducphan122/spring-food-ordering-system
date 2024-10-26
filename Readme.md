@@ -1,6 +1,11 @@
 ## order-service
 - OrderItem, Order is implemented with builder pattern that allows for the step-by-step construction of complex objects. Can be created with Lombok @Builder annotation, but because it is in domain layer, we dont want any dependency on any framework or library, so we implement it manually.
 
+### Exception handling
+- For application layer, we use @ControllerAdvice to handle exceptions that are thrown from domain-core. 
+- We also use a global @ControllerAdvice in common module to handle generic exceptions that are unexpected. When handling globally, log the error internally but return a generic error message for security reason (make sense because we dont even know that the error exists).
+- We also use global @ControllerAdvice in common module to handle validation errors, that are thrown from application-service layer, mostly from dto or interface (example OrderApplicationService in input ports)
+
 ## Infrastructure
 - run docker compose to start kafka cluster, zookeeper and create topics
 
