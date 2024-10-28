@@ -1,13 +1,12 @@
 package com.spring.food.ordering.system.order.service.dataaccess.order.entity;
 
 import com.spring.food.ordering.system.domain.valueobject.OrderStatus;
-import lombok.*;
-
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.*;
 
 @Getter
 @Setter
@@ -19,12 +18,15 @@ import java.util.UUID;
 public class OrderEntity {
     @Id
     private UUID id;
+
     private UUID customerId;
     private UUID restaurantId;
     private UUID trackingId;
     private BigDecimal price;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+
     private String failureMessages;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)

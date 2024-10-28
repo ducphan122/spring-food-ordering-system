@@ -71,6 +71,22 @@ Input Ports:
 Output Ports:
 - OrderCreatedPaymentRequestMessagePublisher, OrderCancelledPaymentRequestMessagePublisher, OrderPaidRestaurantRequestMessagePublisher are the message publisher output ports to publish 3 types of events in order domain logic
 
+### Repositories examples
+**OrderRepository (domain -> application-service -> output port -> repository)**
+- Uses domain objects (`Order`, `OrderId`)
+- Defines WHAT can be done
+
+**OrderJpaRepository (order-dataaccess -> order -> repository)**
+- Uses JPA entities and Spring
+- Defines HOW data is store in database
+
+**OrderJpaRepositoryImpl (order-dataaccess -> order -> adapter)**
+- It is the adapter between JPA and domain layer
+- Implements OrderRepository and use OrderJpaRepository
+- Handles the mapping between domain entities and JPA entities
+
+Flow: `Domain → output port (OrderRepository) → adapter (OrderJpaRepositoryImpl) -> repository (OrderJpaRepository) -> Entity database`
+
 ## Event Publisher
 - OrderApplicationServiceImpl call OrderCreateCommandHandler to create order. After saving order to database, OrderCreateCommandHandler will publish OrderCreatedEvent. In some cases, we can also use spring transactional event listener to automatically publish the event after transaction is committed.
 
@@ -80,3 +96,4 @@ Output Ports:
 
 ## order-dataaccess
 - In JPA, when an entity like OrderItemEntity has multiple columns forming its primary key (composite key), we need a separate class (OrderItemEntityId) annotated with @IdClass to represent this composite key. This class must implement Serializable to allow JPA to convert the primary key object into bytes for caching, session management, and distributed systems. The composite key class needs to mirror the primary key fields of the main entity and must provide proper equals() and hashCode() methods for entity comparison and identification. This approach is particularly useful when one of the primary key fields is also used in relationships (like @ManyToOne).
+
