@@ -77,3 +77,6 @@ Output Ports:
 ## Event Listener
 - PaymentResponseMessageListenerImpl and RestaurantApprovalResponseMessageListenerImpl are the event listeners for payment and restaurant approval responses. They are triggered by the domain events from other bounded contexts (payment and restaurant service). 
 - Will be implemented in saga pattern
+
+## order-dataaccess
+- In JPA, when an entity like OrderItemEntity has multiple columns forming its primary key (composite key), we need a separate class (OrderItemEntityId) annotated with @IdClass to represent this composite key. This class must implement Serializable to allow JPA to convert the primary key object into bytes for caching, session management, and distributed systems. The composite key class needs to mirror the primary key fields of the main entity and must provide proper equals() and hashCode() methods for entity comparison and identification. This approach is particularly useful when one of the primary key fields is also used in relationships (like @ManyToOne).
