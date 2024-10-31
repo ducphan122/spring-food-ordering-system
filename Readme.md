@@ -23,3 +23,22 @@
 - The domain has no knowledge about event publishing or event tracking. It only creates and return the events after running business logic. Application service will decide when and how to raise the events.
 - By keeping repository interactions and event publishing within the application service, the domain core remains focused solely on business logic without being burdened by infrastructure concerns. 
 - Additionally, while domain services are not mandatory in DDD, I prefer to use them to encapsulate interactions with multiple aggregates or complex logic, allowing the application service to handle event creation through the domain service rather than directly interacting with entities.
+
+## Customer, Restaurant Data Architecture: From Shared Schema to Service Isolation 
+This is example of customer only (restaurant is similar)
+Current 
+├── customer schema
+│   ├── customer table (source)
+│   └── order_customer_m_view (materialized view)
+└── order schema
+    └── (order related tables)
+
+-> Oder will use materialized view from customer schema to get customer data, but this is not scalable and coupled
+
+Future
+- Update customer data through events rather than direct database access. Each service will have its own database -> achieve true "database per service"
+├── Customer Service
+│   └── Customer Database
+├── Order Service
+│   └── Order Database (including customer data table)
+└── Kafka (for event sourcing)
