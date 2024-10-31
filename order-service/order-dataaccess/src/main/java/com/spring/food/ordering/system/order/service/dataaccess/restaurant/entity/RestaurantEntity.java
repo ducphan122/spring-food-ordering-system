@@ -1,7 +1,5 @@
 package com.spring.food.ordering.system.order.service.dataaccess.restaurant.entity;
 
-import lombok.*;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -9,6 +7,7 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.*;
 
 @Getter
 @Setter
@@ -22,8 +21,10 @@ public class RestaurantEntity {
 
     @Id
     private UUID restaurantId;
+
     @Id
     private UUID productId;
+
     private String restaurantName;
     private Boolean restaurantActive;
     private String productName;

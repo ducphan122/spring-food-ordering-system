@@ -2,7 +2,7 @@ package com.spring.food.ordering.system.order.service.dataaccess.restaurant.exce
 
 public class RestaurantDataAccessException extends RuntimeException {
 
-  public RestaurantDataAccessException(String message) {
-    super(message);
-  }
+    public RestaurantDataAccessException(String message) {
+        super(message);
+    }
 }
