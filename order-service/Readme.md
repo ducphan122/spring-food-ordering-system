@@ -90,6 +90,9 @@ In the publisher:
 - It is used to create single runnable jar files and run as microservice
 - It also contains the docker file to build docker image to use it in cloud deployment
 
+### BeanConfiguration
+- We are registering the OrderDomainService as a Spring bean by defining @Bean-annotated methods in a configuration class that return a new OrderDomainServiceImpl instance. This approach allows the domain core module to remain free of Spring dependencies while enabling the OrderDomainService to be injected into the order application service module. When the Spring Boot application starts, it recognizes and registers the domain service as a Spring bean, facilitating its use within the application without directly coupling the domain core to Spring.
+
 ## order-dataaccess
 - In JPA, when an entity like OrderItemEntity has multiple columns forming its primary key (composite key), we need a separate class (OrderItemEntityId) annotated with @IdClass to represent this composite key. This class must implement Serializable to allow JPA to convert the primary key object into bytes for caching, session management, and distributed systems. The composite key class needs to mirror the primary key fields of the main entity and must provide proper equals() and hashCode() methods for entity comparison and identification. This approach is particularly useful when one of the primary key fields is also used in relationships (like @ManyToOne).
 
