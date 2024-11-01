@@ -98,6 +98,8 @@ In the publisher:
 
 ## FAQ
 
+### Simple Workflow
+- POST /orders -> OrderController -> OrderApplicationService -> OrderApplicationServiceImpl -> OrderCreateCommandHandler -> OrderService-> OrderCreatedEvent -> OrderCreatedPaymentRequestMessagePublisher -> CreateOrderKafkaMessagePublisher -> OrderServiceConfigData.paymentRequestTopicName -> Kafka Producer -> PaymentRequestAvroModel -> OrderServiceConfigData.paymentResponseTopicName -> Kafka Consumer -> PaymentResponseMessageListener -> OrderCancelledEvent -> OrderCancelledPaymentRequestMessagePublisher -> OrderServiceConfigData.paymentRequestTopicName -> Kafka Producer -> PaymentRequestAvroModel
 ### Order State changing status
 Order States and Transitions
 - Pending

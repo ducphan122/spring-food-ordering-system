@@ -43,4 +43,44 @@ Future
 │   └── Order Database (including customer data table)
 └── Kafka (for event sourcing)
 
+## How to run the project
+
+### Installation
+- make sure the database is created and running. Database name should be postgres. Use PgAdmin to check for database. Use Dbeaver to connect to database.
+- run docker compose to start kafka cluster, zookeeper and create topics (in infrastructure folder)
+- run the project with mvn spring-boot:run at order-container (make sure the kafka is running because the order-messaging depends on kafkaProducer Bean to send topic and @KafkaListener for consuming topic), customer-container and restaurant-container. This will populate the database with some schema and data every time it starts
+
+### Check the topic, consumer group and consumer lag
+After running the project, login to kafka-manager at http://localhost:9000/ and check the topic, consumer group and consumer lag
+Use Extension kafka vscode and connect to 1 of of the kafka bootstrap server (19092, 29092, 39092) to see the topic, consumer group and consumer lag
+
+### Read message from kafka
+- make a POST request to http://localhost:8181/orders, with body
+{
+  "customerId": "d215b5f8-0249-4dc5-89a3-51fd148cfb41",
+  "restaurantId": "d215b5f8-0249-4dc5-89a3-51fd148cfb45",
+  "address": {
+    "street": "street_1",
+    "postalCode": "1000AB",
+    "city": "Amsterdam"
+  },
+  "price": 200.00,
+  "items": [
+    {
+      "productId": "d215b5f8-0249-4dc5-89a3-51fd148cfb48",
+      "quantity": 1,
+      "price": 50.00,
+      "subTotal": 50.00
+    },
+    {
+      "productId": "d215b5f8-0249-4dc5-89a3-51fd148cfb48",
+      "quantity": 3,
+      "price": 50.00,
+      "subTotal": 150.00
+    }
+  ]
+}
+- Use the command to read message from kafka: docker run -it --network=host edenhill/kcat:1.7.1 -b localhost:19092 -C -t payment-request
+
+
 
