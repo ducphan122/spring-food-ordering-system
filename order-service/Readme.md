@@ -84,6 +84,7 @@ In the publisher:
 
 ## order-application
 - It is the entry point from the clients and it should pass request to domain layer -> It has dependency to order-application-service
+- REST Controller
 
 ## order-container
 - It has all dependencies of all modules

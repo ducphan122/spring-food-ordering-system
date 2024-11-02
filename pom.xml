@@ -10,6 +10,7 @@
         <module>infrastructure</module>
         <module>customer-service</module>
         <module>restaurant-service</module>
+        <module>payment-service</module>
     </modules>
 
     <parent>
