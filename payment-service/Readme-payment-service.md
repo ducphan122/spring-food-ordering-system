@@ -1,7 +1,5 @@
 # payment-domain
 
-## payment-application-service
-
 ## payment-domain-core
 
 ### Entity
@@ -34,11 +32,39 @@ Total Credits ($100) - Total Debits ($30) = Current Balance ($70)
 - Check if customer has enough credit
 - Deduct payment amount from customer's credit
 - Record DEBIT transaction in history
-- Validate transaction history consistency
-- Return COMPLETED or FAILED payment event based on validation results
+- Validate transaction history consistency by
+  - Checking total debits don't exceed total credits
+  - Verifying current balance matches historical calculations
+- If validations pass:
+  - Updates payment status to COMPLETED
+  - Creates PaymentCompletedEvent
+- If validations fail:
+  - Updates payment status to FAILED
+  - Creates PaymentFailedEvent
 
 **Validate and Cancel Payment**
 - Validate payment details
 - Add payment amount back to customer's credit (refund)
 - Record CREDIT transaction in history
 - Return CANCELLED or FAILED payment event based on validation results
+
+
+## payment-application-service
+
+- In this layer, we implement `PaymentRequestMessageListenerImpl`, which is interface defined in ports/input/message/listener/PaymentRequestMessageListener.
+- Compare with order-service, order-service has 2 layer for ports/input, which is ports/input/service and ports/input/message.listener. Because order-service is microservice that is entrypoint for client(rest-api), thats why it has input/service. For this payment-service, it is not entrypoint for client, it is just a microservice that is triggered by order-service or other services. Thats why it has only input/message.listener.
+
+**PaymentRequestMessageListenerImpl**
+1. persistPayment:
+- Initial Request Processing: Receives a PaymentRequest, Maps PaymentRequest DTO to Payment domain entity
+- Fetch Required Data: Gets CreditEntry, CreditHistory list for the customer
+- Domain Service -> Validate and Initiate Payment
+- Persist Changes: Saves Payment entity (with paymentStatus already set via domain service methods)
+- If validation success: save updated CreditEntry (new balance) and only the last record of CreditHistory (the DEBIT transaction) that was added via domain service methods
+- Return Result: Returns PaymentEvent (either Completed or Failed)
+The key point is that this follows a typical domain-driven design pattern where:
+- Application layer (`PaymentRequestHelper`) coordinates the overall flow
+- Domain layer (`PaymentDomainService`) contains all business logic and validation rules
+- Persistence only happens after all domain rules are satisfied
+- The entire operation is transactional (annotated with `@Transactional`)
+2. Fire events

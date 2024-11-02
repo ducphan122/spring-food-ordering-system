@@ -1,5 +1,42 @@
-## order-service
+## Domain Layer
 - OrderItem, Order is implemented with builder pattern that allows for the step-by-step construction of complex objects. Can be created with Lombok @Builder annotation, but because it is in domain layer, we dont want any dependency on any framework or library, so we implement it manually.
+### Domain Core
+**Entity**
+- Represent the core business logic and state of the application.
+- State Mutability: Entities can change state through their lifecycle, should be controlled through well-defined methods
+- Aggregate Root: Entities that are responsible for managing a collection of associated entities. It is crucial to define clear boundaries for your Aggregates and their Aggregate Roots. Understanding what it can and cannot contain is essential for maintaining a robust and maintainable architecture.
+
+**ValueObject**
+- Represent a value in the domain, not an entity, immutable, no identity, no behavior
+- Any "modification" should create a new instance
+
+**Event**
+- Events that can be used by domain-application-service to publish message to kafka. These events are called mostly by interfaces in domain-application-service/ports/output/message/publisher. These interfaces will be implemented in messaging module.
+
+**Exception**
+- Every exception that happens in domain layer should be an instance defined in this folder. SO that the application layer (Rest Controller Advice) can handle it properly.
+
+### Domain Application Service
+**Config**
+- DomainServiceConfigData -> configuration for domain service, get the configuration from application.yml with prefix @ConfigurationProperties
+
+**Mapper**
+- Use mapper to create domain object from input dto. And create output dto from domain object
+
+**ports/input**
+- Define how external actors interact with the core, domain business logic (entry points). This represents the use cases or business operations.There are 2 types of input ports:
+- **message/listener**: define the methods that will be called when a message topic is received, this interface will also be implemented by application service. This is for internal communication between microservices.
+- **service**: this interface will be implemented by application service, used mainly for entrypoint of client (rest-api or postman,...)
+**ports/output**
+- Define how the core communicates with external systems.
+- **message/publisher**: define the methods that will be called to publish a message to kafka. This interface will be implemented by _messaging module_
+- **repository**: define the methods that will interact with database. This interface will be implemented by _dataaccess layer_
+
+## Messaging Layer
+## Dataaccess layer
+## Container Layer
+## Application Layer
+
 
 ### Exception handling
 - For application layer, we use @ControllerAdvice to handle exceptions that are thrown from domain-core. 
