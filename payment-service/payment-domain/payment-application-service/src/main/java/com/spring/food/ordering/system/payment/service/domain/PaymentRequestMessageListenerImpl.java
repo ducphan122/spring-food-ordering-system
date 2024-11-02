@@ -10,19 +10,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaymentRequestMessageListenerImpl implements PaymentRequestMessageListener {
 
-  private final PaymentRequestHelper paymentRequestHelper;
+    private final PaymentRequestHelper paymentRequestHelper;
 
-  public PaymentRequestMessageListenerImpl(PaymentRequestHelper paymentRequestHelper) {
-    this.paymentRequestHelper = paymentRequestHelper;
-  }
+    public PaymentRequestMessageListenerImpl(PaymentRequestHelper paymentRequestHelper) {
+        this.paymentRequestHelper = paymentRequestHelper;
+    }
 
-  @Override
-  public void completePayment(PaymentRequest paymentRequest) {
-    PaymentEvent paymentEvent = paymentRequestHelper.persistPayment(paymentRequest);
-  }
+    @Override
+    public void completePayment(PaymentRequest paymentRequest) {
+        PaymentEvent paymentEvent = paymentRequestHelper.persistPayment(paymentRequest);
+    }
 
-  @Override
-  public void cancelPayment(PaymentRequest paymentRequest) {
-    PaymentEvent paymentEvent = paymentRequestHelper.persistCancelPayment(paymentRequest);
-  }
+    @Override
+    public void cancelPayment(PaymentRequest paymentRequest) {
+        PaymentEvent paymentEvent = paymentRequestHelper.persistCancelPayment(paymentRequest);
+    }
 }
