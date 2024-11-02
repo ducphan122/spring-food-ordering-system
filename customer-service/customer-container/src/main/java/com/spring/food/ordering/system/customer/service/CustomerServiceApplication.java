@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = "com.spring.food.ordering.system")
 public class CustomerServiceApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(CustomerServiceApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(CustomerServiceApplication.class, args);
+    }
 }
