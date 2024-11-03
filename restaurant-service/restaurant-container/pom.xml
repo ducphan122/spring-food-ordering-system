@@ -12,19 +12,26 @@
     <artifactId>restaurant-container</artifactId>
     <dependencies>
         <dependency>
+            <groupId>com.spring.food.ordering.system</groupId>
+            <artifactId>restaurant-domain-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spring.food.ordering.system</groupId>
+            <artifactId>restaurant-application-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spring.food.ordering.system</groupId>
+            <artifactId>restaurant-dataaccess</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spring.food.ordering.system</groupId>
+            <artifactId>restaurant-messaging</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
