@@ -145,7 +145,7 @@ Future
 ### Installation
 - make sure the database is created and running. Database name should be postgres. Use PgAdmin to check for database. Use Dbeaver to connect to database.
 - run docker compose to start kafka cluster, zookeeper and create topics (in infrastructure folder)
-- run the project with mvn spring-boot:run at order-container (make sure the kafka is running because the order-messaging depends on kafkaProducer Bean to send topic and @KafkaListener for consuming topic), customer-container and restaurant-container. This will populate the database with some schema and data every time it starts
+- run the project with mvn spring-boot:run at order-container (make sure the kafka is running because the order-messaging depends on kafkaProducer Bean to send topic and @KafkaListener for consuming topic), customer-container and restaurant-container and payment-container. This will populate the database with some schema and data every time it starts
 
 ### Check the topic, consumer group and consumer lag
 After running the project, login to kafka-manager at http://localhost:9000/ and check the topic, consumer group and consumer lag
