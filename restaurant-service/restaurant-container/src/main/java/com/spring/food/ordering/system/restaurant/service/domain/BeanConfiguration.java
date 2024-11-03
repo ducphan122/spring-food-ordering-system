@@ -6,9 +6,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfiguration {
 
-  @Bean
-  public RestaurantDomainService restaurantDomainService() {
-    return new RestaurantDomainServiceImpl();
-  }
-
+    @Bean
+    public RestaurantDomainService restaurantDomainService() {
+        return new RestaurantDomainServiceImpl();
+    }
 }
