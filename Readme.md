@@ -122,7 +122,7 @@ Flow: `Domain → output port repository interface → adapter → repository �
 - Additionally, while domain services are not mandatory in DDD, I prefer to use them to encapsulate interactions with multiple aggregates or complex logic, allowing the application service to handle event creation through the domain service rather than directly interacting with entities.
 
 ## Customer, Restaurant Data Architecture: From Shared Schema to Service Isolation 
-This is example of customer only (restaurant is similar)
+**This is example of customer only**
 Current 
 ├── customer schema
 │   ├── customer table (source)
@@ -139,6 +139,11 @@ Future
 ├── Order Service
 │   └── Order Database (including customer data table)
 └── Kafka (for event sourcing)
+
+**This is example of restaurant only**
+order_restaurant_m_view is a materialized view in restaurant schema, order service will use this to get restaurant data. This materialized view will have restaurantId and productId as composite key, the data structure represents a restaurant-product relationship where:
+- One restaurant can have many products
+- Each row represents a unique restaurant-product combination
 
 ## How to run the project
 
