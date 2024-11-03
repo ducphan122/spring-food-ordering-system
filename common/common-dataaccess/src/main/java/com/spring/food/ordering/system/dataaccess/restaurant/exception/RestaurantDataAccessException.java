@@ -1,4 +1,4 @@
-package com.spring.food.ordering.system.order.service.dataaccess.restaurant.exception;
+package com.spring.food.ordering.system.dataaccess.restaurant.exception;
 
 public class RestaurantDataAccessException extends RuntimeException {
 

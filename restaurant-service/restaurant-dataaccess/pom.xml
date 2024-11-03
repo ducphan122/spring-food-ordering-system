@@ -5,19 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.spring.food.ordering.system</groupId>
-        <artifactId>order-service</artifactId>
+        <artifactId>restaurant-service</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>order-dataaccess</artifactId>
 
-    <properties>
-    </properties>
-
+    <artifactId>restaurant-dataaccess</artifactId>
     <dependencies>
         <dependency>
             <groupId>com.spring.food.ordering.system</groupId>
-            <artifactId>order-application-service</artifactId>
+            <artifactId>restaurant-application-service</artifactId>
         </dependency>
         <dependency>
             <groupId>com.spring.food.ordering.system</groupId>
@@ -32,5 +29,6 @@
             <artifactId>postgresql</artifactId>
         </dependency>
     </dependencies>
+
 
 </project>

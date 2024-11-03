@@ -1,7 +1,7 @@
-package com.spring.food.ordering.system.order.service.dataaccess.restaurant.repository;
+package com.spring.food.ordering.system.dataaccess.restaurant.repository;
 
-import com.spring.food.ordering.system.order.service.dataaccess.restaurant.entity.RestaurantEntity;
-import com.spring.food.ordering.system.order.service.dataaccess.restaurant.entity.RestaurantEntityId;
+import com.spring.food.ordering.system.dataaccess.restaurant.entity.RestaurantEntity;
+import com.spring.food.ordering.system.dataaccess.restaurant.entity.RestaurantEntityId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
