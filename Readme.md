@@ -171,6 +171,27 @@ Use Extension kafka vscode and connect to 1 of of the kafka bootstrap server (19
 - Order Service consumes Order Approved and updates the order status to "Approved".
 - Client can query the order status through the Tracking Endpoint.
 
+**Ordering unavailable product**
+- Client Initiates Order: Sends Order JSON via POST to Order Controller.
+Order Service Validates Order: Validates order details and saves it with status "Pending".
+- Publish Payment Request: Order Service publishes Payment Request to payment-request Kafka topic.
+- Payment Service Processes Payment: Consumes Payment Request, processes payment, and publishes Payment - Completed to payment-response topic.
+- Update Order to "Paid": Order Service consumes Payment Completed, updates order status to "Paid", and publishes Order Paid to restaurant-approval-request topic.
+- Restaurant Service Attempts Approval: Consumes Order Paid, detects product is unavailable, rejects order, and publishes Order Rejected to restaurant-approval-response topic.
+- Handle Order Rejection: Order Service consumes Order Rejected, updates status to "Canceling", and publishes Order Canceled to payment-request topic.
+- Rollback Payment: Payment Service consumes Order Canceled, rolls back payment, and publishes Payment Canceled to payment-response topic.
+- Finalize Order Cancellation: Order Service consumes Payment Canceled and updates order status to "Canceled".
+- Client Queries Status: Client checks order status via Tracking Endpoint and sees "Canceled" with failure message.
+
+**Insufficient Credit**
+- Client Initiates Order: Sends Order JSON via POST to Order Controller with total amount exceeding available credit.
+- Order Service Validates Order: Validates order details and saves it with status "Pending".
+- Publish Payment Request: Order Service publishes Payment Request to payment-request Kafka topic.
+- Payment Service Attempts Payment: Consumes Payment Request, detects insufficient credits, and publishes Payment Failed to payment-response topic.
+- Handle Payment Failure: Order Service consumes Payment Failed, updates order status to "Canceled", and logs failure reason.
+- Client Queries Status: Client checks order status via Tracking Endpoint and sees "Canceled" with insufficient credit message.
+
+
 # Saga Pattern
 **Definition**: A pattern for managing distributed transactions across multiple services, where each transaction is broken down into a sequence of local transactions.
 
@@ -219,6 +240,40 @@ This pattern is particularly useful in microservices architectures where maintai
 **OrderApprovalMessageListenerImpl will call OrderApprovalSaga** (Steps 5 and 6 of Example Flow)
 
 # Outbox Pattern
+
+As seen from Saga Pattern, what if the publishing fails? Or the consumer fails before running the business - Outbox pattern is used to ensure that the message is published to the topic even if the business logic failed.logic?
+
+
+# Convert to plain text result
+
+- Outbox Pattern, which uses local ACID transactions to create consistent distributed transactions and complete SAGA in a safe and consistent way.
+- The SAGA pattern involves a long-running transaction with a local data store transaction and events publishing and consuming operations, but it can leave the system in an inconsistent state if not handled properly.
+- The Outbox Pattern resolves this issue by not publishing events directly, instead keeping them in a local database table called the Outbox Table, which belongs to the same database used for local database operations.
+- This allows for a single ACID transaction to complete database operations and insert events into the Outbox Table, ensuring that events are created automatically within the local database.
+- The Outbox Pattern is completed by reading data from the Outbox Table and publishing events, which can be done using two approaches: 
+  - pulling the table data
+  - change data capture
+- For now we will use the pulling Outbox Table approach and handle possible failure scenarios
+- The Outbox Table is used to:
+  - **Track SAGA Status**:
+    - Maintains the current state of each SAGA operation
+    - Records which steps have been completed
+    - Stores compensation/rollback information if needed
+    - Helps resume operations after system failures
+  
+  - **Ensure Idempotency**:
+    - Stores unique message IDs for each event
+    - Prevents duplicate processing of the same event or consume same data
+  
+  - **Prevent Data Corruption with Optimistic Locking and DB Constraints**:
+    - Uses version numbers or timestamps for optimistic locking
+    - Handles concurrent operations safely
+    - Maintains data integrity across distributed transactions
+    - Provides audit trail of all operations
+
+
+# CQRS Pattern
+
 ## Customer, Restaurant Data Architecture: From Shared Schema to Service Isolation 
 **This is example of customer only**
 Current 
