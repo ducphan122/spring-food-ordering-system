@@ -120,8 +120,9 @@ Flow: `Domain → output port repository interface → adapter → repository �
 
 ## How to run the project
 
-- we use mvn clean install to build and install the jar file to the local maven repository
+- we use mvn clean install to build and install the jar file. You can also build each service separately by running mvn clean install at each service folder.
 - use depgraph-maven-plugin to generate the dependency graph: mvn com.github.ferstl:depgraph-maven-plugin:aggregate -DcreateImage=true -DreduceEdges=false -Dscope=compile "-Dincludes=com.spring.food.ordering.system:*"
+- For locally purpose. After running all docker compose. Open each service/container folder -> run command: mvn spring-boot:run (comment the build steps in pom.xml for faster build time)
 
 ### Installation
 - make sure the database is created and running. Database name should be postgres. Use PgAdmin to check for database. Use Dbeaver to connect to database.
@@ -132,7 +133,7 @@ Flow: `Domain → output port repository interface → adapter → repository �
 After running the project, login to kafka-manager at http://localhost:9000/ and check the topic, consumer group and consumer lag
 Use Extension kafka vscode and connect to 1 of of the kafka bootstrap server (19092, 29092, 39092) to see the topic, consumer group and consumer lag
 
-### Read message from kafka
+### Basic flow
 - make a POST request to http://localhost:8181/orders, with body
 {
   "customerId": "d215b5f8-0249-4dc5-89a3-51fd148cfb41",
@@ -159,6 +160,16 @@ Use Extension kafka vscode and connect to 1 of of the kafka bootstrap server (19
   ]
 }
 - Use the command to read message from kafka: docker run -it --network=host edenhill/kcat:1.7.1 -b localhost:19092 -C -t payment-request
+- Alternatively, use kafka-ui at http://localhost:8080/.
+**Flows**
+- Client sends Order JSON via POST to Order Controller.
+- Order Service validates and saves order in the database.
+- Order Service publishes Payment Request to Kafka (payment-request topic).
+- Payment Service consumes Payment Request, processes payment, and publishes Payment Completed to Kafka (payment-response topic).
+- Order Service consumes Payment Completed, updates order status to "Paid", and publishes Order Paid to Kafka (restaurant-approval-request topic).
+- Restaurant Service consumes Order Paid, approves the order, and publishes Order Approved to Kafka (restaurant-approval-response topic).
+- Order Service consumes Order Approved and updates the order status to "Approved".
+- Client can query the order status through the Tracking Endpoint.
 
 # Saga Pattern
 **Definition**: A pattern for managing distributed transactions across multiple services, where each transaction is broken down into a sequence of local transactions.

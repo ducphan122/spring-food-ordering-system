@@ -7,8 +7,9 @@ Command:
 - docker-compose -f common.yml -f init_kafka.yml up (run only when kafka topics are not created)
 - docker-compose -f common.yml -f kafka-ui.yml up
 Steps:
-- after running all dockers, open localhost:9000
-- add cluster with name spring-food-ordering-system, cluster Zookeeper hosts zookeeper:2181
+- after running all dockers, open localhost:9000 ->  add cluster with name spring-food-ordering-system, cluster Zookeeper hosts zookeeper:2181
+- open localhost:8080 -> create spring-food-ordering-system cluster -> add bootstrap servers: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092.
+
 
 Note:
 - Create volumes folder: zookeeper/data and zookeeper/transactions, kafka/broker-1, kafka/broker-2, kafka/broker-3 first because if we let docker compose create it, it fails to write into it because of permissions.

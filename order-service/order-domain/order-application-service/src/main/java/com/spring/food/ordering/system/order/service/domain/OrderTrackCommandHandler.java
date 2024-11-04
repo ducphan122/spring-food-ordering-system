@@ -11,6 +11,7 @@ import com.spring.food.ordering.system.order.service.domain.valueobject.Tracking
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -23,6 +24,7 @@ public class OrderTrackCommandHandler {
         this.orderRepository = orderRepository;
     }
 
+    @Transactional(readOnly = true)
     public TrackOrderResponse trackOrder(TrackOrderQuery trackOrderQuery) {
         Optional<Order> orderResult =
                 orderRepository.findByTrackingId(new TrackingId(trackOrderQuery.getOrderTrackingId()));
