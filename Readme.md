@@ -241,11 +241,9 @@ This pattern is particularly useful in microservices architectures where maintai
 
 # Outbox Pattern
 
-As seen from Saga Pattern, what if the publishing fails? Or the consumer fails before running the business - Outbox pattern is used to ensure that the message is published to the topic even if the business logic failed.logic?
+As seen from Saga Pattern, what if the publishing fails? Or the consumer fails before running the business - Outbox pattern is used to ensure that the message is published to the topic even if the business logic failed?
 
-
-# Convert to plain text result
-
+## Introduction
 - Outbox Pattern, which uses local ACID transactions to create consistent distributed transactions and complete SAGA in a safe and consistent way.
 - The SAGA pattern involves a long-running transaction with a local data store transaction and events publishing and consuming operations, but it can leave the system in an inconsistent state if not handled properly.
 - The Outbox Pattern resolves this issue by not publishing events directly, instead keeping them in a local database table called the Outbox Table, which belongs to the same database used for local database operations.
@@ -271,6 +269,10 @@ As seen from Saga Pattern, what if the publishing fails? Or the consumer fails b
     - Maintains data integrity across distributed transactions
     - Provides audit trail of all operations
 
+## Implementation
+
+**Order Service**
+- the 3 events: OrderCreatedEvent, OrderPaidEvent, OrderApprovedEvent are persisted to the database tables but are segregated into two tables to keep unrelated events separate, one for payment servce and one for restaurant service.
 
 # CQRS Pattern
 
