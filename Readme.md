@@ -1,3 +1,5 @@
+# DDD
+
 ## Domain Layer
 - OrderItem, Order is implemented with builder pattern that allows for the step-by-step construction of complex objects. Can be created with Lombok @Builder annotation, but because it is in domain layer, we dont want any dependency on any framework or library, so we implement it manually.
 ### Domain Core
@@ -103,17 +105,6 @@ Flow: `Domain → output port repository interface → adapter → repository �
 - We also use a global @ControllerAdvice in common module to handle generic exceptions that are unexpected. When handling globally, log the error internally but return a generic error message for security reason (make sense because we dont even know that the error exists).
 - We also use global @ControllerAdvice in common module to handle validation errors, that are thrown from application-service layer, mostly from dto or interface (example OrderApplicationService in input ports)
 
-## Infrastructure
-- run docker compose to start kafka cluster, zookeeper and create topics
-
-## Others
-- we use mvn clean install to build and install the jar file to the local maven repository
-- use depgraph-maven-plugin to generate the dependency graph: mvn com.github.ferstl:depgraph-maven-plugin:aggregate -DcreateImage=true -DreduceEdges=false -Dscope=compile "-Dincludes=com.spring.food.ordering.system:*"
-
-## common
-- common-domain will have entity, value object, exception that can be used across different services
-- value object is immutable, thats why we use final keyword
-
 ## Understanding domain events in DDD
 
 - Creating domain events within the domain core—either in entities or domain services—to ensure that events are generated as part of the business logic. However, the actual firing of these events is delegated to the application service. This separation ensures that business operations are first persisted to the database before any events are triggered, preventing the possibility of firing incorrect events if persistence fails. 
@@ -121,31 +112,16 @@ Flow: `Domain → output port repository interface → adapter → repository �
 - By keeping repository interactions and event publishing within the application service, the domain core remains focused solely on business logic without being burdened by infrastructure concerns. 
 - Additionally, while domain services are not mandatory in DDD, I prefer to use them to encapsulate interactions with multiple aggregates or complex logic, allowing the application service to handle event creation through the domain service rather than directly interacting with entities.
 
-## Customer, Restaurant Data Architecture: From Shared Schema to Service Isolation 
-**This is example of customer only**
-Current 
-├── customer schema
-│   ├── customer table (source)
-│   └── order_customer_m_view (materialized view)
-└── order schema
-    └── (order related tables)
+# Project Structure
 
--> Oder will use materialized view from customer schema to get customer data, but this is not scalable and coupled
-
-Future
-- Update customer data through events rather than direct database access. Each service will have its own database -> achieve true "database per service"
-├── Customer Service
-│   └── Customer Database
-├── Order Service
-│   └── Order Database (including customer data table)
-└── Kafka (for event sourcing)
-
-**This is example of restaurant only**
-order_restaurant_m_view is a materialized view in restaurant schema, order service will use this to get restaurant data. This materialized view will have restaurantId and productId as composite key, the data structure represents a restaurant-product relationship where:
-- One restaurant can have many products
-- Each row represents a unique restaurant-product combination
+- infrastructure: run docker compose to start kafka cluster, zookeeper and create topics
+- common: common classes that can be used across different modules
+- microservices: order, customer, restaurant, payment
 
 ## How to run the project
+
+- we use mvn clean install to build and install the jar file to the local maven repository
+- use depgraph-maven-plugin to generate the dependency graph: mvn com.github.ferstl:depgraph-maven-plugin:aggregate -DcreateImage=true -DreduceEdges=false -Dscope=compile "-Dincludes=com.spring.food.ordering.system:*"
 
 ### Installation
 - make sure the database is created and running. Database name should be postgres. Use PgAdmin to check for database. Use Dbeaver to connect to database.
@@ -183,6 +159,79 @@ Use Extension kafka vscode and connect to 1 of of the kafka bootstrap server (19
   ]
 }
 - Use the command to read message from kafka: docker run -it --network=host edenhill/kcat:1.7.1 -b localhost:19092 -C -t payment-request
+
+# Saga Pattern
+
+**Definition**: A pattern for managing distributed transactions across multiple services, where each transaction is broken down into a sequence of local transactions.
+
+**Key Components**:
+- Chain of local transactions
+- Compensation (rollback) mechanism for failures
+- Choreography approach using events (in this case, Kafka)
+
+**Example Flow 1**:
+1. The **Order Service** acts as the coordinator for the SAGA flow, initiating the process.
+2. It starts by sending an **Order Created** event to the **Payment Service**.
+3. The Order Service’s local database marks the order as **Pending**.
+4. Upon receiving a **Payment Completed** event from the Payment Service, the Order Service updates the order status to **Paid** in its database.
+5. It then sends an **Order Paid** event to the **Restaurant Service** to request order approval.
+6. When the **Order Service** receives an **Order Approved** event from the Restaurant Service, it updates the order status to **Approved** in its database.
+7. The **Approved** state is then returned to clients when they query the order through the **GET** endpoint.
+8. After receiving the approved state, the client can trigger the next steps, such as starting the **Delivery Process**.
+
+**Example Flow 2**:
+1. The **Order Service** acts as the coordinator for the SAGA flow, initiating the process.
+2. It starts by sending an **Order Created** event to the **Payment Service**.
+3. The Order Service’s local database marks the order as **Pending**.
+4. Upon receiving a **Payment Completed** event from the Payment Service, the Order Service updates the order status to **Paid** in its database.
+5. It then sends an **Order Paid** event to the **Restaurant Service** to request order approval.
+6. When the **Order Service** receives a **Order Rejected** event from the Restaurant Service (via order-messaging/listener), it will call reject method in _application-service/ports/input/message/listener/restaurantapproval/_ , this reject method will call rollback defined in OrderApprovalSaga, which is in _domain-application-service_, the returned value from this rollback is a OrderCancelledEvent. This OrderCancelledEvent will be fired as PaymentRequestAvroModel via _order-messaging/publisher/kafka/CreateOrderKafkaMessagePublisher.java_. The order state will be right now "CANCELLING". 
+7. The Payment Service will listen to _payment-request_ topic, and it will consume the message (PaymentRequestAvroModel) via PaymentRequestKafkaListener(in messaging module) -> paymentRequestMessageListener(in application-service) -> this paymentRequestMessageListener will get the required Entities (via interact with repository), then it will give all these entities to domain-service to run business logic, then it persist the data to database. Then take the returned event from domain-service and fire it. In this case is a PaymentCancelledEvent.
+8. The PaymentCancelledEvent will be consumed by _order-messaging/listener/kafka/OrderResponseKafkaListener_ . It will then call rollback method in OrderPaymentSaga, the returned value from this rollback is a EmptyEvent. Because nothing to do here, the flow is finished, the order state is now "CANCELLED".
+
+**Implementation Requirements**:
+- Each SAGA step must implement:
+  - `process()` - Execute the local transaction
+  - `rollback()` - Compensate/undo if failure occurs later
+
+This pattern is particularly useful in microservices architectures where maintaining data consistency across services is crucial
+
+## Implementation
+- Create SagaStep interface in common-domain
+- In order-application-service we implement the SagaStep interface because order-service is the coordinator of the saga flow
+
+**PaymentResponseMessageListenerImpl will call OrderPaymentSaga** (Steps 4 of Example Flow)
+- In order-messaging we have a kafka listener to listen to the topic payment-response, and based on the payment response, it will call the methods defined in interface ports/input/message/listener/payment/. This interface is then implemented in order-application-service via PaymentResponseMessageListenerImpl
+- PaymentResponseMessageListenerImpl will call the methods in OrderPaymentSaga, which implements SagaStep interface. OrderPaymentSaga will interact with domain-service to run business logic (domain service will give back the domain events), then it will use repository to persist the data to database. After that it return the domain event
+- PaymentResponseMessageListenerImpl will then use the returned domain event to fire the event that restaurant-service is subscribed to, so that restaurant-service can perform its business logic
+
+**OrderApprovalMessageListenerImpl will call OrderApprovalSaga** (Steps 5 and 6 of Example Flow)
+
+# Outbox Pattern
+## Customer, Restaurant Data Architecture: From Shared Schema to Service Isolation 
+**This is example of customer only**
+Current 
+├── customer schema
+│   ├── customer table (source)
+│   └── order_customer_m_view (materialized view)
+└── order schema
+    └── (order related tables)
+
+-> Oder will use materialized view from customer schema to get customer data, but this is not scalable and coupled
+
+Future
+- Update customer data through events rather than direct database access. Each service will have its own database -> achieve true "database per service"
+├── Customer Service
+│   └── Customer Database
+├── Order Service
+│   └── Order Database (including customer data table)
+└── Kafka (for event sourcing)
+
+**This is example of restaurant only**
+order_restaurant_m_view is a materialized view in restaurant schema, order service will use this to get restaurant data. This materialized view will have restaurantId and productId as composite key, the data structure represents a restaurant-product relationship where:
+- One restaurant can have many products
+- Each row represents a unique restaurant-product combination
+
 
 
 
