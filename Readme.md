@@ -271,8 +271,14 @@ As seen from Saga Pattern, what if the publishing fails? Or the consumer fails b
 
 ## Implementation
 
-**Order Service**
+### Order Service
 - the 3 events: OrderCreatedEvent, OrderPaidEvent, OrderApprovedEvent are persisted to the database tables but are segregated into two tables to keep unrelated events separate, one for payment servce and one for restaurant service.
+- OrderPaymentOutboxMessage and OrderApprovalOutboxMessage are the outbox tables for payment and restaurant service respectively.
+
+**ports/output/message/publisher**
+- we dont need seperate publisher for each event (Ex: OrderCreatedEvent, OrderPaidEvent,OrderCancelledEvent, ) because we use outbox publisher for each service (payment, restaurant). We can differentiate the event type by using the payload object from outbox message (which are the domain events) 
+  - In PaymentOutboxMessage there is OrderPaymentEventPayload, which has field paymentOrderStatus, which can be PAID or CREATED or CANCELLED
+  - In RestaurantOutboxMessage there is OrderApprovalEventPayload, which has field restaurantOrderStatus, which can be APPROVED
 
 # CQRS Pattern
 

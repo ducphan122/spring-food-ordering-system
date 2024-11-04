@@ -21,6 +21,10 @@
         </dependency>
         <dependency>
             <groupId>com.spring.food.ordering.system</groupId>
+            <artifactId>outbox</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.spring.food.ordering.system</groupId>
             <artifactId>order-domain-core</artifactId>
         </dependency>
         <dependency>
