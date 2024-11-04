@@ -161,8 +161,8 @@ Use Extension kafka vscode and connect to 1 of of the kafka bootstrap server (19
 - Use the command to read message from kafka: docker run -it --network=host edenhill/kcat:1.7.1 -b localhost:19092 -C -t payment-request
 
 # Saga Pattern
-
 **Definition**: A pattern for managing distributed transactions across multiple services, where each transaction is broken down into a sequence of local transactions.
+
 
 **Key Components**:
 - Chain of local transactions

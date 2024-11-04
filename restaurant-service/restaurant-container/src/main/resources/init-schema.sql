@@ -8,6 +8,14 @@ DROP      TABLE IF EXISTS restaurant.restaurants CASCADE;
 
 CREATE    TABLE restaurant.restaurants (id uuid NOT NULL, name character varying COLLATE pg_catalog."default" NOT NULL, active boolean NOT NULL, CONSTRAINT restaurants_pkey PRIMARY KEY (id));
 
+DROP      TYPE IF EXISTS approval_status;
+
+CREATE TYPE approval_status AS ENUM ('APPROVED', 'REJECTED');
+
+DROP      TABLE IF EXISTS restaurant.order_approval CASCADE;
+
+CREATE    TABLE restaurant.order_approval (id uuid NOT NULL, restaurant_id uuid NOT NULL, order_id uuid NOT NULL, status approval_status NOT NULL, CONSTRAINT order_approval_pkey PRIMARY KEY (id));
+
 DROP      TABLE IF EXISTS restaurant.products CASCADE;
 
 CREATE    TABLE restaurant.products (id uuid NOT NULL, name character varying COLLATE pg_catalog."default" NOT NULL, price numeric(10, 2) NOT NULL, available boolean NOT NULL, CONSTRAINT products_pkey PRIMARY KEY (id));
