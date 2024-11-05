@@ -1,9 +1,11 @@
 package com.spring.food.ordering.system.order.service.domain;
 
 import com.spring.food.ordering.system.domain.valueobject.OrderId;
+import com.spring.food.ordering.system.domain.valueobject.OrderStatus;
 import com.spring.food.ordering.system.order.service.domain.entity.Order;
 import com.spring.food.ordering.system.order.service.domain.exception.OrderNotFoundException;
 import com.spring.food.ordering.system.order.service.domain.ports.output.repository.OrderRepository;
+import com.spring.food.ordering.system.saga.SagaStatus;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,7 @@ public class OrderSagaHelper {
             case CANCELLED:
                 return SagaStatus.COMPENSATED;
             default:
+                // case PENDING
                 return SagaStatus.STARTED;
         }
     }

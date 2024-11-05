@@ -271,6 +271,7 @@ As seen from Saga Pattern, what if the publishing fails? Or the consumer fails b
 
 ## Implementation
 
+- use ObjectMapper for Json serialization of domain events. With spring-boot-starter-json, a default ObjectMapper is created and it is used for serialization/deserialization, we can however add custom configuration, properties to it (Ex: add FAIL_ON_UNKNOWN_PROPERTIES to false will prevent failing when it encounters unknown JSON properties during serialization)
 ### Order Service
 - the 3 events: OrderCreatedEvent, OrderPaidEvent, OrderApprovedEvent are persisted to the database tables but are segregated into two tables to keep unrelated events separate, one for payment servce and one for restaurant service.
 - OrderPaymentOutboxMessage and OrderApprovalOutboxMessage are the outbox tables for payment and restaurant service respectively.
@@ -280,6 +281,12 @@ As seen from Saga Pattern, what if the publishing fails? Or the consumer fails b
   - In PaymentOutboxMessage there is OrderPaymentEventPayload, which has field paymentOrderStatus, which can be PAID or CREATED or CANCELLED
   - In RestaurantOutboxMessage there is OrderApprovalEventPayload, which has field restaurantOrderStatus, which can be APPROVED
 
+**PaymentOutboxScheduler**
+- This scheduler will read the outbox table, and publish the message to the topic. It only process message with outboxStatus = STARTED, and sagaStatus = STARTED or COMPENSATING. We use these 2 sagaStatus because in if we look at OrderSagaHelper, we are actually asking for order PENDING (when first Created) and CANCELLING (when restaurant reject the order) events, which are the 2 types of events that paymentService is subscribed to.
+- This Scheduler will use paymentRequestMessagePublisher interface to publish the message, passing the outboxMessage as well as a method to update and persist outbox status to database. Because this method will be used by the publisher, which is a implementation of paymentRequestMessagePublisher interface in the messaging module
+- The reason why we process message with outboxStatus = STARTED, because when Scheduler publish the message, it will update the outbox status to either COMPLETED or FAILED, so the next time scheduler process message, it wont process the same message again. In rare cases, because of network delay, the first scheduler publish method is not called until the second run of scheduler, this time the same outboxMessage may be published more than once
+  - Option 1: this can be handled by strict lock and await mechanism, but it will make the scheduler slower and not acceptable in distributed applications
+  - Option 2: we should be cautious for the consumer side, in this case is the payment service, it will eliminate duplicate messages. This will make sure we have idempotent (distince) messages
 # CQRS Pattern
 
 ## Customer, Restaurant Data Architecture: From Shared Schema to Service Isolation 
