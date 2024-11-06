@@ -133,7 +133,7 @@ Flow: `Domain → output port repository interface → adapter → repository �
 After running the project, login to kafka-manager at http://localhost:9000/ and check the topic, consumer group and consumer lag
 Use Extension kafka vscode and connect to 1 of of the kafka bootstrap server (19092, 29092, 39092) to see the topic, consumer group and consumer lag
 
-### Basic flow
+### POST /orders
 - make a POST request to http://localhost:8181/orders, with body
 {
   "customerId": "d215b5f8-0249-4dc5-89a3-51fd148cfb41",
@@ -192,6 +192,13 @@ Order Service Validates Order: Validates order details and saves it with status 
 - Client Queries Status: Client checks order status via Tracking Endpoint and sees "Canceled" with insufficient credit message.
 
 
+### POST /payments/top-up
+- make a POST request to http://localhost:8282/payments/top-up, with body
+{
+  "customerId": "d215b5f8-0249-4dc5-89a3-51fd148cfb41",
+  "amount": 100.00
+}
+This should add 100.00 to the customer's credit entry and update credit history with type "CREDIT"
 # Saga Pattern
 **Definition**: A pattern for managing distributed transactions across multiple services, where each transaction is broken down into a sequence of local transactions.
 
@@ -287,6 +294,11 @@ As seen from Saga Pattern, what if the publishing fails? Or the consumer fails b
 - The reason why we process message with outboxStatus = STARTED, because when Scheduler publish the message, it will update the outbox status to either COMPLETED or FAILED, so the next time scheduler process message, it wont process the same message again. In rare cases, because of network delay, the first scheduler publish method is not called until the second run of scheduler, this time the same outboxMessage may be published more than once
   - Option 1: this can be handled by strict lock and await mechanism, but it will make the scheduler slower and not acceptable in distributed applications
   - Option 2: we should be cautious for the consumer side, in this case is the payment service, it will eliminate duplicate messages. This will make sure we have idempotent (distince) messages
+
+**PaymentOutboxCleanerScheduler**
+- This scheduler will delete the outbox message with outboxStatus = COMPLETED, and sagaStatus = SUCCEEDED, FAILED, COMPENSATED. We use these 3 sagaStatus because we want to delete the message after it is successfully processed by the consumer. 
+- We can also store the message in archive table for audit purpose (not implemented)
+
 # CQRS Pattern
 
 ## Customer, Restaurant Data Architecture: From Shared Schema to Service Isolation 

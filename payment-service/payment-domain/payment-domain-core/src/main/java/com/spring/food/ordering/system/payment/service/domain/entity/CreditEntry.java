@@ -1,11 +1,11 @@
 package com.spring.food.ordering.system.payment.service.domain.entity;
 
-import com.spring.food.ordering.system.domain.entity.BaseEntity;
+import com.spring.food.ordering.system.domain.entity.AggregateRoot;
 import com.spring.food.ordering.system.domain.valueobject.CustomerId;
 import com.spring.food.ordering.system.domain.valueobject.Money;
 import com.spring.food.ordering.system.payment.service.domain.valueobject.CreditEntryId;
 
-public class CreditEntry extends BaseEntity<CreditEntryId> {
+public class CreditEntry extends AggregateRoot<CreditEntryId> {
 
     private final CustomerId customerId;
     private Money totalCreditAmount;

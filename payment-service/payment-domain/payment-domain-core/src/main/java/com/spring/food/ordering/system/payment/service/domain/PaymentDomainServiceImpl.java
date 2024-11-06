@@ -3,6 +3,7 @@ package com.spring.food.ordering.system.payment.service.domain;
 import static com.spring.food.ordering.system.domain.DomainConstants.UTC;
 
 import com.spring.food.ordering.system.domain.event.publisher.DomainEventPublisher;
+import com.spring.food.ordering.system.domain.valueobject.CustomerId;
 import com.spring.food.ordering.system.domain.valueobject.Money;
 import com.spring.food.ordering.system.domain.valueobject.PaymentStatus;
 import com.spring.food.ordering.system.payment.service.domain.entity.CreditEntry;
@@ -90,6 +91,36 @@ public class PaymentDomainServiceImpl implements PaymentDomainService {
         }
     }
 
+    @Override
+    public void validateAndInitiateTopUp(
+            CreditEntry creditEntry,
+            Money topUpAmount,
+            List<CreditHistory> creditHistories,
+            List<String> failureMessages) {
+
+        log.info(
+                "Validating top-up amount for customer: {}",
+                creditEntry.getCustomerId().getValue());
+
+        if (topUpAmount == null || !topUpAmount.isGreaterThanZero()) {
+            log.error(
+                    "Top-up amount must be greater than zero for customer: {}",
+                    creditEntry.getCustomerId().getValue());
+            failureMessages.add("Top-up amount must be greater than zero!");
+            return;
+        }
+
+        creditEntry.addCreditAmount(topUpAmount);
+        updateCreditHistoryForTopUp(creditEntry.getCustomerId(), topUpAmount, creditHistories);
+        validateCreditHistory(creditEntry, creditHistories, failureMessages);
+
+        if (failureMessages.isEmpty()) {
+            log.info(
+                    "Successfully topped up credit for customer: {}",
+                    creditEntry.getCustomerId().getValue());
+        }
+    }
+
     private void validateCreditEntry(Payment payment, CreditEntry creditEntry, List<String> failureMessages) {
         if (payment.getPrice().isGreaterThan(creditEntry.getTotalCreditAmount())) {
             log.error(
@@ -146,5 +177,14 @@ public class PaymentDomainServiceImpl implements PaymentDomainService {
 
     private void addCreditEntry(Payment payment, CreditEntry creditEntry) {
         creditEntry.addCreditAmount(payment.getPrice());
+    }
+
+    private void updateCreditHistoryForTopUp(CustomerId customerId, Money amount, List<CreditHistory> creditHistories) {
+        creditHistories.add(CreditHistory.builder()
+                .creditHistoryId(new CreditHistoryId(UUID.randomUUID()))
+                .customerId(customerId)
+                .amount(amount)
+                .transactionType(TransactionType.CREDIT)
+                .build());
     }
 }

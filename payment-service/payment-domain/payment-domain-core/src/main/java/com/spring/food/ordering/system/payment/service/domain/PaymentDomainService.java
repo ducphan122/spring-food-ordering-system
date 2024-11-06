@@ -1,6 +1,7 @@
 package com.spring.food.ordering.system.payment.service.domain;
 
 import com.spring.food.ordering.system.domain.event.publisher.DomainEventPublisher;
+import com.spring.food.ordering.system.domain.valueobject.Money;
 import com.spring.food.ordering.system.payment.service.domain.entity.CreditEntry;
 import com.spring.food.ordering.system.payment.service.domain.entity.CreditHistory;
 import com.spring.food.ordering.system.payment.service.domain.entity.Payment;
@@ -27,4 +28,10 @@ public interface PaymentDomainService {
             List<String> failureMessages,
             DomainEventPublisher<PaymentCancelledEvent> paymentCancelledEventDomainEventPublisher,
             DomainEventPublisher<PaymentFailedEvent> paymentFailedEventDomainEventPublisher);
+
+    void validateAndInitiateTopUp(
+            CreditEntry creditEntry,
+            Money topUpAmount,
+            List<CreditHistory> creditHistories,
+            List<String> failureMessages);
 }
