@@ -77,11 +77,11 @@ CREATE INDEX "payment_outbox_saga_status" ON "order".payment_outbox (
 	saga_status
 );
 
-CREATE UNIQUE INDEX "payment_outbox_saga_id" ON "order".payment_outbox (
-	type,
-	saga_id,
-	saga_status
-);
+-- CREATE UNIQUE INDEX "payment_outbox_saga_id" ON "order".payment_outbox (
+-- 	type,
+-- 	saga_id,
+-- 	saga_status
+-- );
 
 -- restaurant_approval_outbox
 DROP TABLE IF EXISTS "order".restaurant_approval_outbox CASCADE;
@@ -107,8 +107,8 @@ CREATE INDEX "restaurant_approval_outbox_saga_status" ON "order".restaurant_appr
 	saga_status
 );
 
-CREATE UNIQUE INDEX "restaurant_approval_outbox_saga_id" ON "order".restaurant_approval_outbox (
-	type,
-	saga_id,
-	saga_status
-);
+-- CREATE UNIQUE INDEX "restaurant_approval_outbox_saga_id" ON "order".restaurant_approval_outbox (
+-- 	type,
+-- 	saga_id,
+-- 	saga_status
+-- );
