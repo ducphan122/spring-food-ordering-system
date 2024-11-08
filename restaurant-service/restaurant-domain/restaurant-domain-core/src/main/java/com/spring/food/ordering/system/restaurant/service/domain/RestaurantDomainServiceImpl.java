@@ -2,7 +2,6 @@ package com.spring.food.ordering.system.restaurant.service.domain;
 
 import static com.spring.food.ordering.system.domain.DomainConstants.UTC;
 
-import com.spring.food.ordering.system.domain.event.publisher.DomainEventPublisher;
 import com.spring.food.ordering.system.domain.valueobject.OrderApprovalStatus;
 import com.spring.food.ordering.system.restaurant.service.domain.entity.Restaurant;
 import com.spring.food.ordering.system.restaurant.service.domain.event.OrderApprovalEvent;
@@ -17,11 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RestaurantDomainServiceImpl implements RestaurantDomainService {
 
     @Override
-    public OrderApprovalEvent validateOrder(
-            Restaurant restaurant,
-            List<String> failureMessages,
-            DomainEventPublisher<OrderApprovedEvent> orderApprovedEventDomainEventPublisher,
-            DomainEventPublisher<OrderRejectedEvent> orderRejectedEventDomainEventPublisher) {
+    public OrderApprovalEvent validateOrder(Restaurant restaurant, List<String> failureMessages) {
         restaurant.validateOrder(failureMessages);
         log.info(
                 "Validating order with id: {}",
@@ -36,8 +31,7 @@ public class RestaurantDomainServiceImpl implements RestaurantDomainService {
                     restaurant.getOrderApproval(),
                     restaurant.getId(),
                     failureMessages,
-                    ZonedDateTime.now(ZoneId.of(UTC)),
-                    orderApprovedEventDomainEventPublisher);
+                    ZonedDateTime.now(ZoneId.of(UTC)));
         } else {
             log.info(
                     "Order is rejected for order id: {}",
@@ -47,8 +41,7 @@ public class RestaurantDomainServiceImpl implements RestaurantDomainService {
                     restaurant.getOrderApproval(),
                     restaurant.getId(),
                     failureMessages,
-                    ZonedDateTime.now(ZoneId.of(UTC)),
-                    orderRejectedEventDomainEventPublisher);
+                    ZonedDateTime.now(ZoneId.of(UTC)));
         }
     }
 }
