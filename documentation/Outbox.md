@@ -30,21 +30,28 @@ As seen from Saga Pattern, what if the publishing fails? Or the consumer fails b
 
 - use ObjectMapper for Json serialization of domain events. With spring-boot-starter-json, a default ObjectMapper is created and it is used for serialization/deserialization, we can however add custom configuration, properties to it (Ex: add FAIL_ON_UNKNOWN_PROPERTIES to false will prevent failing when it encounters unknown JSON properties during serialization)
 
+A typical outbox structure is as follows:
+- in **application-service/outbox**, we have model and scheduler. 
+  - In model, We have OderOutboxMessage. In OderOutboxMessage, we also have a string payload, which is the serialized json of OrderEventPayload
+  - In scheduler, we have PaymentOutboxScheduler and PaymentOutboxCleanerScheduler.
+- In **application-service/ports/output/repository**, which is the interface to save, find, delete the outbox message. This interface is implemented in dataaccess layer
+- In **application-service/ports/output/message/publisher**, we have the outbox publisher interface, which is implemented in messaging module. This interface has a publish method, which takes in an outboxMessage and a callback BiConsumer method to update outbox status 
+
 ## Order Service
 - the 3 events: OrderCreatedEvent, OrderPaidEvent, OrderApprovedEvent are persisted to the database tables but are segregated into two tables to keep unrelated events separate, one for payment servce and one for restaurant service.
 - OrderPaymentOutboxMessage and OrderApprovalOutboxMessage are the outbox tables for payment and restaurant service respectively.
+
 
 **ports/output/message/publisher**
 - we dont need seperate publisher for each event (Ex: OrderCreatedEvent, OrderPaidEvent,OrderCancelledEvent, ) because we use outbox publisher for each service (payment, restaurant). We can differentiate the event type by using the payload object from outbox message (which are the domain events) 
   - In PaymentOutboxMessage there is OrderPaymentEventPayload, which has field paymentOrderStatus, which can be PAID or CREATED or CANCELLED
   - In RestaurantOutboxMessage there is OrderApprovalEventPayload, which has field restaurantOrderStatus, which can be APPROVED
 
-**PaymentOutboxScheduler**
-- This scheduler will read the outbox table, and publish the message to the topic. It only process message with outboxStatus = STARTED, and sagaStatus = STARTED or COMPENSATING. We use these 2 sagaStatus because in if we look at OrderSagaHelper, we are actually asking for order PENDING (when first Created) and CANCELLING (when restaurant reject the order) events, which are the 2 types of events that paymentService is subscribed to.
-- This Scheduler will use paymentRequestMessagePublisher interface to publish the message, passing the outboxMessage as well as a method to update and persist outbox status to database. Because this method will be used by the publisher, which is a implementation of paymentRequestMessagePublisher interface in the messaging module
-- The reason why we process message with outboxStatus = STARTED, because when Scheduler publish the message, it will update the outbox status to either COMPLETED or FAILED, so the next time scheduler process message, it wont process the same message again. In rare cases, because of network delay, the first scheduler publish method is not called until the second run of scheduler, this time the same outboxMessage may be published more than once
+**PaymentOutboxScheduler Notes**
+In rare cases, because of network delay, the first scheduler publish method is not called until the second run of scheduler, this time the same OrderPaymentOutboxMessage->PaymentRequestAvroModel may be published more than once
   - Option 1: this can be handled by strict lock and await mechanism, but it will make the scheduler slower and not acceptable in distributed applications
-  - Option 2: we should be cautious for the consumer side, in this case is the restaurant service, after processing the message, it will update the outbox status to COMPLETED or FAILED, so the next time scheduler process message, it wont process the same message again. This will make sure we have idempotent (distince) messages
+  - Option 2: we should be cautious for the consumer side, in this case is the payment service (in PaymentRequestKafkaListener -> PaymentRequestHelper.persistPayment), we will eliminate duplicate message (not run the business logic). This will make sure we have idempotent (distinct) message. See PaymentRequestHelper.persistPayment comment
+- Notes, in both OrderService and PaymentService, we have optimistic locking and unique constraint to prevent saving the final state of OutboxMessage. But in rare cases,if 2 concurrent threads that simultaneously bypass the check (if exist outBoxMessage before), they can both run the business logic, even for the payment service to update the CreditEntry and CreditHistory. However, this is not an issue because at the end, it will need to save the final state of OutboxMessage, and the unique constraint or optimistic locking will raise an exception. Because we annotate the entire operation with @Transactional, any changes made by one of the thread will be rolled back. 
 
 **PaymentOutboxCleanerScheduler**
 - This scheduler will delete the outbox message with outboxStatus = COMPLETED, and sagaStatus = SUCCEEDED, FAILED, COMPENSATED. We use these 3 sagaStatus because we want to delete the message after it is successfully processed by the consumer. 
@@ -67,19 +74,36 @@ See OrderPaymentSaga.java
 - Status changes are atomic within transactions
 
 3. **Outbox Message Lifecycle**:
-- Created with outboxStatus STARTED
-- Every 10 seconds, PaymentOutboxScheduler will pick up the message with outboxStatus STARTED + SagaStatus STARTED or COMPENSATING (we dont explain this in this scenario) and update the SagaStatus to PROCESSING, then the event is published
-- Then in payment-service, ...
-- After payment is completed, the payment-service will update the outboxStatus to COMPLETED, then PaymentResponseAvroModel is published
-- In order-service, the PaymentResponseKafkaListener will listen for the message and decide based on paymentStatus.
-  - If payment is PAID, it will call paymentCompleted method in PaymentResponseMessageListener, which is in ports/input/message/listener/payment
-  - If payment is CANCELLED, it will call paymentCancelled method. Here we dont discuss this 
-- In paymentCompleted, it will first get the outBoxmessage that has sagaStatus as STARTED (in this stage the outBoxStatus is already set COMPLETED by payment-service), then it will using domain service to set the order to PAID, then update the sagaStatus to PROCESSING. Then it will save this outBoxmessage in both payment-outbox and approval-outbox tables. It saves to approval-outbox to prepare for the next step in saga (restaurant approval). The sagaStatus of payment-outbox will be updated to SUCCEEDED by OrderApprovalSaga.
-- 
+Stage1
+- An order is created, saved to database, and an outbox message is also created with outboxStatus STARTED, it has the OrderEventPayload as payload string. This outbox Message is saved in payment_outbox table.
+- Every 10 seconds, the PaymentOutboxScheduler will read the outbox table and pick up the message that has outboxStatus STARTED + SagaStatus STARTED (translate to OrderPending) + SagaStatus COMPENSATING (we dont explain this in this scenario). It then called the publish method via interface PaymentRequestMessagePublisher, passing in the outboxMessage and a callback method to update the outboxStatus of OrderPaymentOutboxMessage in payment_outbox table.
+- OrderPaymentEventKafkaPublisher is implementation of PaymentRequestMessagePublisher, it will get the OrderPaymentEventPayload from outboxMessage, then convert it to PaymentRequestAvroModel, then publish it to the payment-request topic, it will also pass the callback method to update the outboxStatus of OrderPaymentOutboxMessage in payment_outbox table.
+- If the message is published successfully, Kafka will call the callback method via KafkaMessageHelper, and use this callback to update the outboxStatus of OrderPaymentOutboxMessage in payment_outbox table to COMPLETED. If the message is not published successfully, the callback will update the outboxStatus to FAILED. Remember that the SagaStatus is STARTED. This will be needed in stage 3
 
-This approach ensures that even if the same operation is attempted multiple times (due to retries or system issues), it will only be processed once, maintaining data consistency
+Stage2
+- Then in payment-service, we have PaymentRequestKafkaListener to listen for the message from payment-request topic. Based on the paymentOrderStatus in PaymentRequestAvroModel, it will call paymentRequestMessageListener completePayment or cancelPayment method (in this scenario we will focus on completePayment). If we have multiple implentations of paymentRequestMessageListener, we can use the @Qualifier to specify which one to use.
+- paymentRequestMessageListener is the interface defined in ports/input. It has an implementation PaymentRequestMessageListenerImpl. The completePayment method will use PaymentRequestHelper in domain-service to persist the payment. After running business logic, it will use OrderOutboxHelper->OrderOutboxRepository interface->OrderOutboxRepositoryImpl (in dataacess adapter)->OrderOutboxJpaRepository (@Repository) to save this outboxmessage in order-outbox table with outboxStatus STARTED, paymentStatus is COMPLETED
+- Then the OrderOutboxScheduler will every 10 seconds pick up OrderOutboxMessage that has outboxStatus STARTED, and publish it to the message bus using paymentResponseMessagePublisher. It pass in the outboxMessage and a callback method to update the outboxStatus of OrderOutboxMessage in order-outbox table.
+- the PaymentEventKafkaPublisher (implementation of paymentResponseMessagePublisher) will convert the OrderOutboxMessage to PaymentResponseAvroModel, then publish it to the payment-response topic, pass the outBoxCallback to KafkaCallback
+- if the message is published successfully, Kafka will call the callback method via KafkaMessageHelper, and use this callback to update the outboxStatus of OrderOutboxMessage in order-outbox table to COMPLETED. If the message is not published successfully, the callback will update the outboxStatus to FAILED.
 
-## Optimistic Locking in Concurrent Saga Processing
+Stage3
+- Then in order-service, the PaymentResponseKafkaListener will listen for the message and decide based on paymentStatus. if paymentStatus is COMPLETED, it will call paymentCompleted method in PaymentResponseMessageListener, which is in ports/input/message/listener/payment. If paymentStatus is CANCELLED or FAILED, it will call paymentCancelled method.
+- In paymentCompleted, it will delegate to orderPaymentSaga to process, passing paymentResponse as parameter. This paymentResponse has sagaId and PaymentStatus
+- orderPaymentSaga will first get the OrderPaymentOutboxMessage that has sagaId and sagaStatus as STARTED (in this stage the outBoxStatus is already set COMPLETED in stage1 by Kafkacallback, the outBoxStatus will indicates if the outbux message is waiting to be picked up (STARTED) or is sent successfully by kafka (COMPLETED) or failed (FAILED)). The reason why we need to check sagaStatus is STARTED is because we want to make sure the message is not processed twice. 
+- orderPaymentSaga will then run business logic to order and then get the sagaStatus of PROCESSING (translate to OrderPaid)
+  - at this point, there is optimistic lock 
+  - it then save the updated OrderPaymentOutboxMessage in payment-outbox table with sagaStatus PROCESSING, orderStatus PAID, processedAt as current time. The outBoxStatus is still COMPLETED so no need to update it.
+  - it then also saves a OrderApprovalOutboxMessage in restaurant-approval-outbox table. This OrderApprovalOutboxMessage has the same sagaId as the OrderPaymentOutboxMessage. It has sagaStatus as PROCESSING, and outboxStatus as STARTED.
+
+
+## Concurrency Strategy
+- Optimistic locking via JPA version field. 
+- Unique constraint to prevent duplicate payments. This is achieved by creating unique index. See init-schema.sql of all outbox tables, there is always a unique index
+- In oder-service/OrdePaymentSage, we have both optimistic locking and unique constraint. Optimistic locking is used for concurrent get and update of an existing database record.
+- In payment-service, we dont use saga because this is at the end of chain, we only to need process the payment for order Pending or Cancelled. So in payment-service, the main logic happens at PaymentRequestHelper.persistPayment, we only need to check if we have already processed the payment for the same sagaId (in case we assume order-service failed to process the paymentResponse), if yes, we just publish the message again, if no, we process the payment and then save OrderOutboxMessage, we dont actually get the OrderOutboxMessage or update it. So in this case, we dont actually have optimistic locking. Therefore, we only have unique constraint to prevent duplicate payments (via unique index)
+
+### Optimistic Locking in Concurrent Saga Processing
 **Key Challenges**
 - Multiple threads potentially processing the same saga simultaneously
 - Risk of double updates to database records
@@ -97,14 +121,14 @@ Prevents simultaneous updates through version checking mechanism
 5. Conflicting thread's transaction rolls back
 
 **Concurrent Processing Scenarios**
-See OrderPaymentSaga.java
+See OrderPaymentSaga.java, in this case we dont want to save the 
 1. First thread completes: Second thread finds no processable record
 2. Threads arrive simultaneously:
    - One thread successfully updates, other threads wait for the first thread to commit (see Postgres Isolation Level Discussion)
    - Other thread gets rolled back due to version mismatch
 3. Additional protection via unique constraints on certain tables
 
-### Postgres Isolation Level Discussion
+#### Postgres Isolation Level Discussion
 
 **Read Committed Behavior (Postgres Default)**
 - This is the default isolation level in PostgreSQL
@@ -151,4 +175,3 @@ Pessimistic:
 - Stronger isolation
 - More suitable for critical financial transactions
 - Higher performance cost due to blocking
-

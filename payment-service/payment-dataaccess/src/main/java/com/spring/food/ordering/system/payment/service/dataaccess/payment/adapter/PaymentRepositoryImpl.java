@@ -1,5 +1,6 @@
 package com.spring.food.ordering.system.payment.service.dataaccess.payment.adapter;
 
+import com.spring.food.ordering.system.domain.valueobject.PaymentStatus;
 import com.spring.food.ordering.system.payment.service.dataaccess.payment.mapper.PaymentDataAccessMapper;
 import com.spring.food.ordering.system.payment.service.dataaccess.payment.repository.PaymentJpaRepository;
 import com.spring.food.ordering.system.payment.service.domain.entity.Payment;
@@ -29,5 +30,12 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public Optional<Payment> findByOrderId(UUID orderId) {
         return paymentJpaRepository.findByOrderId(orderId).map(paymentDataAccessMapper::paymentEntityToPayment);
+    }
+
+    @Override
+    public Optional<Payment> findByOrderIdAndStatus(UUID orderId, PaymentStatus status) {
+        return paymentJpaRepository
+                .findByOrderIdAndStatus(orderId, status)
+                .map(paymentDataAccessMapper::paymentEntityToPayment);
     }
 }

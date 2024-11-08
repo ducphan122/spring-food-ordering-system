@@ -89,8 +89,8 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
     @Transactional
     public void rollback(PaymentResponse paymentResponse) {
 
-        // the rollback can be called when payment is failed or cancelled or even
-        // completed (in case restaurant rejected the order)
+        // the rollback can be called when payment is failed or cancelled or even completed (in case restaurant rejected
+        // the order)
         Optional<OrderPaymentOutboxMessage> orderPaymentOutboxMessageResponse =
                 paymentOutboxHelper.getPaymentOutboxMessageBySagaIdAndSagaStatus(
                         UUID.fromString(paymentResponse.getSagaId()),
@@ -162,25 +162,20 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
     private OrderApprovalOutboxMessage getUpdatedApprovalOutboxMessage(
             String sagaId, OrderStatus orderStatus, SagaStatus sagaStatus) {
         /*
-         * When a payment is cancelled, it means we're in the middle of a
-         * compensation/rollback flow
+         * When a payment is cancelled, it means we're in the middle of a compensation/rollback flow
          * in the saga pattern. Here's the typical sequence:
          *
          * Normal Flow:
-         * Order Created -> Payment Started -> Payment Completed -> Restaurant Approval
-         * Started
+         * Order Created -> Payment Started -> Payment Completed -> Restaurant Approval Started
          *
          * Compensation Flow (when restaurant rejects the order):
-         * Restaurant Rejects Order -> Payment Cancellation Started -> Payment Cancelled
-         * -> Order Cancelled
+         * Restaurant Rejects Order -> Payment Cancellation Started -> Payment Cancelled -> Order Cancelled
          *
          * When the payment service receives a cancellation request:
          * 1. It changes the payment status to CANCELLED
-         * 2. Before this happens, the restaurant's rejection would have already created
-         * an approval
-         * outbox message with COMPENSATING status
-         * 3. This is why the code expects to find an approval outbox message in
-         * COMPENSATING status
+         * 2. Before this happens, the restaurant's rejection would have already created an approval
+         *    outbox message with COMPENSATING status
+         * 3. This is why the code expects to find an approval outbox message in COMPENSATING status
          */
         Optional<OrderApprovalOutboxMessage> orderApprovalOutboxMessageResponse =
                 approvalOutboxHelper.getApprovalOutboxMessageBySagaIdAndSagaStatus(

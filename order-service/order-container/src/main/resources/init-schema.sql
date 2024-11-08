@@ -107,6 +107,7 @@ CREATE INDEX "restaurant_approval_outbox_saga_status" ON "order".restaurant_appr
 	saga_status
 );
 
+-- Commented out to test optimistic locking behaviour
 -- CREATE UNIQUE INDEX "restaurant_approval_outbox_saga_id" ON "order".restaurant_approval_outbox (
 -- 	type,
 -- 	saga_id,

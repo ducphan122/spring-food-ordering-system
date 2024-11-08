@@ -29,6 +29,7 @@ public class PaymentDataAccessMapper {
                 .orderId(new OrderId(paymentEntity.getOrderId()))
                 .price(new Money(paymentEntity.getPrice()))
                 .createdAt(paymentEntity.getCreatedAt())
+                .paymentStatus(paymentEntity.getStatus())
                 .build();
     }
 }

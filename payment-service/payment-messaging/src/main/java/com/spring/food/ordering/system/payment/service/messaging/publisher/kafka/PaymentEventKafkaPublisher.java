@@ -3,23 +3,26 @@ package com.spring.food.ordering.system.payment.service.messaging.publisher.kafk
 import com.spring.food.ordering.system.kafka.order.avro.model.PaymentResponseAvroModel;
 import com.spring.food.ordering.system.kafka.producer.KafkaMessageHelper;
 import com.spring.food.ordering.system.kafka.producer.service.KafkaProducer;
+import com.spring.food.ordering.system.outbox.OutboxStatus;
 import com.spring.food.ordering.system.payment.service.domain.config.PaymentServiceConfigData;
-import com.spring.food.ordering.system.payment.service.domain.event.PaymentCompletedEvent;
-import com.spring.food.ordering.system.payment.service.domain.ports.output.message.publisher.PaymentCompletedMessagePublisher;
+import com.spring.food.ordering.system.payment.service.domain.outbox.model.OrderEventPayload;
+import com.spring.food.ordering.system.payment.service.domain.outbox.model.OrderOutboxMessage;
+import com.spring.food.ordering.system.payment.service.domain.ports.output.message.publisher.PaymentResponseMessagePublisher;
 import com.spring.food.ordering.system.payment.service.messaging.mapper.PaymentMessagingDataMapper;
+import java.util.function.BiConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class PaymentCompletedKafkaMessagePublisher implements PaymentCompletedMessagePublisher {
+public class PaymentEventKafkaPublisher implements PaymentResponseMessagePublisher {
 
     private final PaymentMessagingDataMapper paymentMessagingDataMapper;
     private final KafkaProducer<String, PaymentResponseAvroModel> kafkaProducer;
     private final PaymentServiceConfigData paymentServiceConfigData;
     private final KafkaMessageHelper kafkaMessageHelper;
 
-    public PaymentCompletedKafkaMessagePublisher(
+    public PaymentEventKafkaPublisher(
             PaymentMessagingDataMapper paymentMessagingDataMapper,
             KafkaProducer<String, PaymentResponseAvroModel> kafkaProducer,
             PaymentServiceConfigData paymentServiceConfigData,
@@ -31,30 +34,42 @@ public class PaymentCompletedKafkaMessagePublisher implements PaymentCompletedMe
     }
 
     @Override
-    public void publish(PaymentCompletedEvent domainEvent) {
-        String orderId = domainEvent.getPayment().getOrderId().getValue().toString();
+    public void publish(
+            OrderOutboxMessage orderOutboxMessage, BiConsumer<OrderOutboxMessage, OutboxStatus> outboxCallback) {
+        OrderEventPayload orderEventPayload =
+                kafkaMessageHelper.getOrderEventPayload(orderOutboxMessage.getPayload(), OrderEventPayload.class);
 
-        log.info("Received PaymentCompletedEvent for order id: {}", orderId);
+        String sagaId = orderOutboxMessage.getSagaId().toString();
+
+        log.info(
+                "Received OrderOutboxMessage for order id: {} and saga id: {}", orderEventPayload.getOrderId(), sagaId);
 
         try {
             PaymentResponseAvroModel paymentResponseAvroModel =
-                    paymentMessagingDataMapper.paymentCompletedEventToPaymentResponseAvroModel(domainEvent);
+                    paymentMessagingDataMapper.orderEventPayloadToPaymentResponseAvroModel(sagaId, orderEventPayload);
 
             kafkaProducer.send(
                     paymentServiceConfigData.getPaymentResponseTopicName(),
-                    orderId,
+                    sagaId,
                     paymentResponseAvroModel,
                     kafkaMessageHelper.getKafkaCallback(
                             paymentServiceConfigData.getPaymentResponseTopicName(),
                             paymentResponseAvroModel,
-                            orderId,
+                            orderOutboxMessage,
+                            outboxCallback,
+                            orderEventPayload.getOrderId(),
                             "PaymentResponseAvroModel"));
 
-            log.info("PaymentResponseAvroModel sent to kafka for order id: {}", orderId);
+            log.info(
+                    "PaymentResponseAvroModel sent to kafka for order id: {} and saga id: {}",
+                    paymentResponseAvroModel.getOrderId(),
+                    sagaId);
         } catch (Exception e) {
             log.error(
-                    "Error while sending PaymentResponseAvroModel message" + " to kafka with order id: {}, error: {}",
-                    orderId,
+                    "Error while sending PaymentRequestAvroModel message"
+                            + " to kafka with order id: {} and saga id: {}, error: {}",
+                    orderEventPayload.getOrderId(),
+                    sagaId,
                     e.getMessage());
         }
     }

@@ -1,8 +1,14 @@
+# Order-container-intergration-test
 ## What are we testing?
 - We are mainly testing the concurrent and optimistic locking mechanism of the Order Payment Saga.
 - In this integration test, we will create simple sql scripts to set up and clean up the test data.
 
 ## Optimistic Locking Test
+- There are 3 approaches to test concurrent:
+  - Threads with CountDownLatch
+  - Threads with join
+  - Using ExecutorService
+
 In a database, optimistic locking is a strategy used to ensure data consistency when multiple transactions are trying to update the same data concurrently. It works by checking if the data has been modified by another transaction before committing the changes. This is typically implemented using a version number or timestamp.
 
 In the SQL schema, the `payment_outbox` and `restaurant_approval_outbox` tables have a `version` column, which is likely used for optimistic locking. The idea is that when a transaction reads a row, it also reads the version number. When it tries to update the row, it checks if the version number is the same as when it was read. If the version number has changed, it means another transaction has modified the row, and the current transaction should be aborted or retried.
@@ -22,3 +28,24 @@ This approach provides a more flexible and robust way to handle concurrent execu
 ## How to run the test?
 - Run with a specific test: go to order-container -> mvn test -Dtest=OrderPaymentSagaTest#testDoublePaymentWithThreads
 - Run with all tests: go to order-container -> mvn test
+
+# Application-service-test
+This is a test class for `OrderApplicationService` which handles order creation in your food ordering system. Here's what it tests:
+
+1. **Happy Path**: `testCreateOrder()` - Tests successful order creation
+2. **Validation Cases**:
+   - `testCreateOrderWithWrongTotalPrice()` - Ensures orders with mismatched total prices are rejected
+   - `testCreateOrderWithWrongProductPrice()` - Verifies product price validation
+   - `testCreateOrderWithPassiveRestaurant()` - Checks that orders can't be created for inactive restaurants
+
+Key Points:
+1. Use `@BeforeEach` to set up default happy-path mocks
+2. Override specific mocks in individual test methods for error scenarios
+3. Verify both successful and failed interactions
+4. Mock all external dependencies (repositories, publishers)
+5. Don't mock the actual domain service (`OrderDomainService`) as it contains the business logic 
+
+- Test business logic in isolation
+- Verify correct interaction with external dependencies
+- Test both success and failure scenarios
+- Maintain readable and maintainable tests
