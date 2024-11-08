@@ -1,10 +1,10 @@
-/* (C)2024 */
 package com.spring.food.ordering.system.order.service.domain.mapper;
 
 import com.spring.food.ordering.system.domain.valueobject.*;
 import com.spring.food.ordering.system.order.service.domain.dto.create.CreateOrderCommand;
 import com.spring.food.ordering.system.order.service.domain.dto.create.CreateOrderResponse;
 import com.spring.food.ordering.system.order.service.domain.dto.create.OrderAddress;
+import com.spring.food.ordering.system.order.service.domain.dto.message.CustomerModel;
 import com.spring.food.ordering.system.order.service.domain.dto.track.TrackOrderResponse;
 import com.spring.food.ordering.system.order.service.domain.entity.*;
 import com.spring.food.ordering.system.order.service.domain.event.OrderCancelledEvent;
@@ -98,6 +98,14 @@ public class OrderDataMapper {
                 .price(orderPaidEvent.getOrder().getPrice().getAmount())
                 .createdAt(orderPaidEvent.getCreatedAt())
                 .build();
+    }
+
+    public Customer customerModelToCustomer(CustomerModel customerModel) {
+        return new Customer(
+                new CustomerId(UUID.fromString(customerModel.getId())),
+                customerModel.getUsername(),
+                customerModel.getFirstName(),
+                customerModel.getLastName());
     }
 
     private List<OrderItem> orderItemsToOrderItemEntities(

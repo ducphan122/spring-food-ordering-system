@@ -1,6 +1,7 @@
 package com.spring.food.ordering.system.order.service.messaging.mapper;
 
 import com.spring.food.ordering.system.kafka.order.avro.model.*;
+import com.spring.food.ordering.system.order.service.domain.dto.message.CustomerModel;
 import com.spring.food.ordering.system.order.service.domain.dto.message.PaymentResponse;
 import com.spring.food.ordering.system.order.service.domain.dto.message.RestaurantApprovalResponse;
 import com.spring.food.ordering.system.order.service.domain.outbox.model.approval.OrderApprovalEventPayload;
@@ -75,6 +76,15 @@ public class OrderMessagingDataMapper {
                         .collect(Collectors.toList()))
                 .setPrice(orderApprovalEventPayload.getPrice())
                 .setCreatedAt(orderApprovalEventPayload.getCreatedAt().toInstant())
+                .build();
+    }
+
+    public CustomerModel customerAvroModeltoCustomerModel(CustomerAvroModel customerAvroModel) {
+        return CustomerModel.builder()
+                .id(customerAvroModel.getId())
+                .username(customerAvroModel.getUsername())
+                .firstName(customerAvroModel.getFirstName())
+                .lastName(customerAvroModel.getLastName())
                 .build();
     }
 }
