@@ -1,5 +1,3 @@
-version: '3.7'
-
 networks:
   spring-food-ordering-system:
     driver: bridge
