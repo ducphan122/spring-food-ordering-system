@@ -10,13 +10,25 @@
 
 ## Example
 - In this project, after saving the customer object in customer local database, we will create and send the customer created event into kafka to hold the event
-- Then in order-service, we will consume the event from kafka and create cqrs store for the customer data
+- Then in order-service, we will consume the event from kafka and create cqrs store for the customer data. From now on, any query about customer data will be served from "customers" table inside order-service schema instead of materialized view.
+
+## How to run project
+- comment out the data sql in application.yml of customer-service because we will now make a POST request to create customer localhost:8184/customers
+We include customerId in the request body because other pre-populated sql data in other services expected this id
+{
+  "customerId": "d215b5f8-0249-4dc5-89a3-51fd148cfb41",
+  "username": "user_1",
+  "firstName": "First",
+  "lastName": "User"
+}
+- POST orders like normal, it should behave as before
 
 
 ## Event-Store and Replayability in CQRS
 
-Once events are placed in an **event-store** (a specialized data store for persisting events), the system gains significant flexibility in how these events can be processed and consumed by various services. The event-store essentially functions as a central repository of all events that have occurred in the system, and this history can be accessed or replayed as needed. 
+Once events are placed in an **event-store** (a specialized data store for persisting events), example a kafka broker, the system gains significant flexibility in how these events can be processed and consumed by various services. The event-store essentially functions as a central repository of all events that have occurred in the system, and this history can be accessed or replayed as needed. 
 - Replaying events in Kafka means creating a new consumer group. It will read the events from start by default.
+- For example, CustomerKafkaListener is a kafka listener of group customer-consumer-group. It will read the events from customer topic, and create a query store in form of database table "customers" inside order-service schema.
 
 ### The Power of Replayability
 

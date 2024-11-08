@@ -1,6 +1,9 @@
 server:
   port: 8184
 
+customer-service:
+  customer-topic-name: customer
+  
 logging:
   level:
     com.spring.food.ordering.system: DEBUG
@@ -24,7 +27,7 @@ spring:
       mode: ALWAYS
       platform: postgres
       schema-locations: classpath:init-schema.sql
-      data-locations: classpath:init-data.sql
+      # data-locations: classpath:init-data.sql
 
 kafka-config:
   bootstrap-servers: localhost:19092, localhost:29092, localhost:39092
