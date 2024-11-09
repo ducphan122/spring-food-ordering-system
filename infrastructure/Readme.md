@@ -5,7 +5,7 @@ Command:
   - then open terminal in the docker container and run command to check if zookeeper is running: echo ruok | nc localhost 2181
 - docker-compose -f common.yml -f kafka_cluster.yml up
 - docker-compose -f common.yml -f init_kafka.yml up (run only when kafka topics are not created or you want to recreate them)
-- docker-compose -f common.yml -f kafka-ui.yml up
+- docker-compose -f common.yml -f kafka-ui.yml up (We have added kafka-ui to kafka_cluster.yml so this command is not needed)
 Steps:
 - after running all dockers, open localhost:9000 ->  add cluster with name spring-food-ordering-system, cluster Zookeeper hosts zookeeper:2181
 - open localhost:8080 -> create spring-food-ordering-system cluster -> add bootstrap servers: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092.
