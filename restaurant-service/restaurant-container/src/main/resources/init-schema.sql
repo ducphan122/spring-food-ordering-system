@@ -58,7 +58,7 @@ WITH
 
 refresh materialized VIEW restaurant.order_restaurant_m_view;
 
-DROP function IF EXISTS restaurant.refresh_order_restaurant_m_view;
+DROP function IF EXISTS restaurant.refresh_order_restaurant_m_view ();
 
 CREATE
 OR replace function restaurant.refresh_order_restaurant_m_view () returns trigger AS '
