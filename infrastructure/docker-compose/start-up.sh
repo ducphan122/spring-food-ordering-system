@@ -170,4 +170,8 @@ curl --location --request POST 'localhost:8083/connectors' \
  }'
 
 echo "Start-up completed"
+
+echo "Delete kcat containers"
+docker ps -a | grep 'edenhill/kcat:1.7.1' | awk '{print $1}' | xargs -r docker rm
+
 read -p "Press any key to exit..."
