@@ -1,11 +1,14 @@
 package com.spring.food.ordering.system.order.service.messaging.mapper;
 
+import com.spring.food.ordering.system.domain.event.payload.PaymentOrderEventPayload;
 import com.spring.food.ordering.system.kafka.order.avro.model.*;
 import com.spring.food.ordering.system.order.service.domain.dto.message.CustomerModel;
 import com.spring.food.ordering.system.order.service.domain.dto.message.PaymentResponse;
 import com.spring.food.ordering.system.order.service.domain.dto.message.RestaurantApprovalResponse;
 import com.spring.food.ordering.system.order.service.domain.outbox.model.approval.OrderApprovalEventPayload;
 import com.spring.food.ordering.system.order.service.domain.outbox.model.payment.OrderPaymentEventPayload;
+import debezium.payment.order_outbox.Value;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -14,18 +17,18 @@ import org.springframework.stereotype.Component;
 public class OrderMessagingDataMapper {
 
     public PaymentResponse paymentResponseAvroModelToPaymentResponse(
-            PaymentResponseAvroModel paymentResponseAvroModel) {
+            PaymentOrderEventPayload paymentOrderEventPayload, Value paymentResponseAvroModel) {
         return PaymentResponse.builder()
                 .id(paymentResponseAvroModel.getId())
                 .sagaId(paymentResponseAvroModel.getSagaId())
-                .paymentId(paymentResponseAvroModel.getPaymentId())
-                .customerId(paymentResponseAvroModel.getCustomerId())
-                .orderId(paymentResponseAvroModel.getOrderId())
-                .price(paymentResponseAvroModel.getPrice())
-                .createdAt(paymentResponseAvroModel.getCreatedAt())
+                .paymentId(paymentOrderEventPayload.getPaymentId())
+                .customerId(paymentOrderEventPayload.getCustomerId())
+                .orderId(paymentOrderEventPayload.getOrderId())
+                .price(paymentOrderEventPayload.getPrice())
+                .createdAt(Instant.parse(paymentResponseAvroModel.getCreatedAt()))
                 .paymentStatus(com.spring.food.ordering.system.domain.valueobject.PaymentStatus.valueOf(
-                        paymentResponseAvroModel.getPaymentStatus().name()))
-                .failureMessages(paymentResponseAvroModel.getFailureMessages())
+                        paymentOrderEventPayload.getPaymentStatus()))
+                .failureMessages(paymentOrderEventPayload.getFailureMessages())
                 .build();
     }
 

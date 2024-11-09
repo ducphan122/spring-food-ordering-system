@@ -216,9 +216,10 @@ This is why it's called a "push-based" approach, as opposed to the previous "pul
 
 3. Listener Updates and Debezium Envelope Class
 - **Replace Generic Types**: In `ResponseKafkaListener` of messaging/listerner/kafka, change the type from `ResponseAvroModel` to `Envelope`
-- **Extract Operation and Data**: Modify the `forEach` loop in the listener to:
+- Because we are using DDD, most of the changing should happen only at messaging module
+- **Extract Operation and Data**: Modify the listener to:
   - Check if the `before` object is null and the operation (`op`) is equal to `'c'` (for create operations).
-- **DebeziumOp Enum**: Create a new `DebeziumOp` enum class with values `create`, `update`, and `delete` (mapped to `'c'`, `'u'`, `'d'`) in a newly created `common-messaging` module.
+
 
 ### Handling Insert, Update, and Delete Events
 - For CDC events, modify code to accept only `'c'` (create) operations to prevent processing `update` or `delete` events.
@@ -229,17 +230,6 @@ This is why it's called a "push-based" approach, as opposed to the previous "pul
 - **Payload Extraction**: Retrieve the `after` object from `Envelope`, representing the inserted data.
 - **OrderEventPayload**: Use `OrderEventPayload` from `payment domain` module to map necessary fields, renaming it to `PaymentOrderEventPayload` to align with the payment-to-order data flow.
 - **PaymentResponse Mapping**: Update `OrderMessagingDataMapper` to map data from `PaymentOrderEventPayload` to `PaymentResponse`, including fields like ID, saga ID, and timestamps.
-
-### Exception Handling for Kafka Consumer Offsets
-- **Unique Constraint Violations**:
-  - Discuss potential issues with concurrent requests, where processed items might trigger a unique constraint exception if not correctly offset in Kafka.
-  - **Solution**: Catch and handle data access exceptions within the listener. This prevents continuous reprocessing of already-handled messages due to uncommitted offsets.
-  - **Kafka Consumer Offset Commit**: Ensure offsets are committed only after successfully processing all records in the input list to prevent duplicate processing on failure.
-
-### Exception Handling Strategies
-- **Single Item vs. List Processing**: 
-  - Assess whether to use a single-item listener or a list of items based on expected failure frequency.
-  - In cases where failures are rare, processing a list (batch) is more efficient; otherwise, single-item processing might be preferable.
 
 ### Final Cleanup
 - **Data Mapper Cleanup**: Remove unused methods from `OrderMessagingDataMapper`.

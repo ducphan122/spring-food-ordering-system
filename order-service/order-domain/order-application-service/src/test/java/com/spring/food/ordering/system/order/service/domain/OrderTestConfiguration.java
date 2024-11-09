@@ -1,7 +1,5 @@
 package com.spring.food.ordering.system.order.service.domain;
 
-import com.spring.food.ordering.system.order.service.domain.ports.output.message.publisher.payment.PaymentRequestMessagePublisher;
-import com.spring.food.ordering.system.order.service.domain.ports.output.message.publisher.restaurantapproval.RestaurantApprovalRequestMessagePublisher;
 import com.spring.food.ordering.system.order.service.domain.ports.output.repository.*;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,16 +7,6 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication(scanBasePackages = "com.spring.food.ordering.system")
 public class OrderTestConfiguration {
-
-    @Bean
-    public PaymentRequestMessagePublisher paymentRequestMessagePublisher() {
-        return Mockito.mock(PaymentRequestMessagePublisher.class);
-    }
-
-    @Bean
-    public RestaurantApprovalRequestMessagePublisher restaurantApprovalRequestMessagePublisher() {
-        return Mockito.mock(RestaurantApprovalRequestMessagePublisher.class);
-    }
 
     /**
      * The OrderDomainService is a core domain service, it will not contain any
