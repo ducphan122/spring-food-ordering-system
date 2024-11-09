@@ -6,10 +6,8 @@ logging:
     com.spring.food.ordering.system: DEBUG
 
 payment-service:
-  payment-request-topic-name: payment-request
-  payment-response-topic-name: payment-response
-  outbox-scheduler-fixed-rate: 10000
-  outbox-scheduler-initial-delay: 10000
+  payment-request-topic-name: debezium.order.payment_outbox
+  payment-response-topic-name: debezium.payment.order_outbox
 
 spring:
   jpa:
