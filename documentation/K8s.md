@@ -39,33 +39,40 @@ First, we want to create a local kubernetes cluster using docker desktop (which 
 3. Install helm 
 - scoop install helm
 
-4. Install
+4. Install Confluent Platform Helm Chart
 - terminal to infra folder, run command: helm install local-confluent-kafka helm/cp-helm-charts --version 0.6.0
   - local-confluent-kafka is the name of our kafka helm cluster
   - helm/cp-helm-charts is the directory of the helm chart that we clone from step 2
   - make sure to changed policy/v1beta1 -> policy/v1
   - Make sure to copy the zookeeper host printed on terminal, we will need it in when creating topics
-  - "local-confluent-kafka-cp-zookeeper-headless" is the name of the zookeeper service
+  - For development locally, "local-confluent-kafka-cp-zookeeper-headless" is the name of the zookeeper service
 
-5. Create kafka client pod
+5. Create deployments
 - kubectl apply -f kafka-client.yml
-- kubectl get pods
-- kubectl exec -it kafka-client -- /bin/bash
-
-6. Create topics
-- kubectl exec kafka-client -- /scripts/create-topics.sh local-confluent-kafka-cp-zookeeper-headless
-- the $1 in the script allows us to pass in the zookeeper host as parameter
-
-7. Start postgres pod
 - kubectl apply -f postgres-deployment.yml
 
-8. Build docker images and start deployments
-- Check all pom.xml in each microservice folder container, make sure the build command is uncommented
+6. Create topics
+- kubectl cp create-topics.sh kafka-client:/kafka-client-storage
+- kubectl exec -it kafka-client -- /bin/bash
+- cd ../..& cd kafka-client-storage
+- sh create-topics.sh local-confluent-kafka-cp-zookeeper-headless
+- exit
+
+Notes: the $1 in the script allows us to pass in the zookeeper host as parameter
+
+7. Build docker images and start deployments
+- Check all pom.xml in each microservice folder container, make sure the build command is uncommented. If you make no changes to the code, you can comment the build command.
 - mvn clean install at root
 - docker images | grep food.ordering.system
 - docker images | Where-Object {$_ -like "*food.ordering.system*"}
 - kubectl apply -f application-deployment-local.yml
 
-7. Delete kafka helm chart and kafka client deployment
+8. Test
+- POST /customers
+- POST /orders
+- GET /orders/{orderTrackingId}
+- CHeck orderStatus from PENDING -> PAID -> APPROVED
+
+9. Delete kafka helm chart and kafka client deployment
 - helm uninstall local-confluent-kafka
-- kubectl delete -f kafka-client.yml
+- kubectl delete -f kafka-client.yml -f postgres-deployment.yml -f application-deployment-local.yml

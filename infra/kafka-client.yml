@@ -1,24 +1,4 @@
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kafka-scripts
-  namespace: default
-data:
-  create-topics.sh: |
-    #!/bin/bash
-    kafka-topics --zookeeper $1:2181 --topic payment-request --delete --if-exists
-    kafka-topics --zookeeper $1:2181 --topic payment-response --delete --if-exists
-    kafka-topics --zookeeper $1:2181 --topic restaurant-approval-request --delete --if-exists
-    kafka-topics --zookeeper $1:2181 --topic restaurant-approval-response --delete --if-exists
-    kafka-topics --zookeeper $1:2181 --topic customer --delete --if-exists
-
-    kafka-topics --zookeeper $1:2181 --topic payment-request --create --partitions 3 --replication-factor 3 --if-not-exists
-    kafka-topics --zookeeper $1:2181 --topic payment-response --create --partitions 3 --replication-factor 3 --if-not-exists
-    kafka-topics --zookeeper $1:2181 --topic restaurant-approval-request --create --partitions 3 --replication-factor 3 --if-not-exists
-    kafka-topics --zookeeper $1:2181 --topic restaurant-approval-response --create --partitions 3 --replication-factor 3 --if-not-exists
-    kafka-topics --zookeeper $1:2181 --topic customer --create --partitions 3 --replication-factor 3 --if-not-exists
----
-apiVersion: v1
 kind: Pod
 metadata:
   name: kafka-client
@@ -28,14 +8,11 @@ spec:
     - name: kafka-client
       image: confluentinc/cp-enterprise-kafka:6.1.0
       volumeMounts:
-        - name: scripts-volume
-          mountPath: /scripts
+        - name: kafka-client-storage
+          mountPath: /kafka-client-storage
       command:
         - sh
         - -c
         - "exec tail -f /dev/null"
   volumes:
-    - name: scripts-volume
-      configMap:
-        name: kafka-scripts
-        defaultMode: 0755  # Makes the script executable
+    - name: kafka-client-storage
