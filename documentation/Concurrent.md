@@ -28,3 +28,93 @@
 - With the implementation of pessimistic locking for credit entry and history check, a thread may experience delays while waiting for the lock to release, potentially leading to a timeout exception. Alternatively, with optimistic locking for credit entry and history check, repeated optimistic lock exceptions could occur, which might cause the Kafka offset commit timeout to expire. This expiration means that the same message could be re-delivered multiple times to the listener, as Kafka will continue attempting to process it until it successfully commits -> In either way, the message will be processed multiple times.
 - Solution: In KafkaListener, instead of processing a list of messages, we will process one message at a time, so that kafka can commit the offset after successfully processing each message.
   - Make changes also to change batch configuration properties in payment-service appilication.yml. Becasue we have KafkaConsumerConfig Configuration class, it will pick up the batchListener and concurrencyLevel from the application.yml file of each service to set up the kafka listener container factory.
+  
+## Pessimistic Locking for Credit Entry and History Check
+- We will use the `@Lock` annotation from Spring Data JPA to implement pessimistic locking on the `findByCustomerId` method in the `CreditEntryJpaRepository`. This annotation ensures that only one thread can access the `CreditEntryEntity` for a given customer ID at a time, preventing concurrent updates to the credit entry and history.
+- The `LockModeType.PESSIMISTIC_WRITE` annotation ensures that the `CreditEntryEntity` is locked when it is accessed, and remains locked until the transaction is complete, in this case is the method persistPayment in PaymentRequestHelper. This prevents other threads from modifying the credit entry while it is being processed, ensuring data consistency.
+
+## Optimistic Locking for Credit Entry and History Check
+- Instead of using pessimistic locking, we can implement optimistic locking using version control in our entities.
+- **Implementation**:
+  1. Add version field to credit entry entity for tracking changes
+  2. Detach entity from JPA first-level cache to force fresh database reads
+  3. Compare versions to detect concurrent modifications
+  
+- **Process Flow**:
+  1. Thread retrieves credit entry with initial version
+  2. Before saving changes, detach entity and reload from database
+  3. Compare versions:
+     - If versions match: No concurrent modification occurred
+     - If versions differ: Another transaction modified the data
+  
+- **Advantages**:
+  - Better performance in low-conflict scenarios
+  - No blocking - allows parallel processing
+  - Natural handling of race conditions
+  
+
+
+### Deep Dive: Entity Detachment in JPA
+- **What Detaching Does**:
+  ```java
+  // In CreditEntryRepositoryImpl.java
+  @Override
+  public void detach(CustomerId customerId) {
+      // 1. Find the entity by customer ID
+      // 2. If not found, throws exception
+      // 3. Removes entity from EntityManager's persistence context
+      entityManager.detach(creditEntryJpaRepository
+          .findByCustomerId(customerId.getValue())
+          .orElseThrow());
+  }
+  ```
+
+- **Step-by-Step Process**:
+  1. **Find Entity**: 
+     - Looks up CreditEntry by customerId in database
+  2. **Detach Operation**: 
+     - Removes the entity from JPA's persistence context (first-level cache)
+     - Makes the entity "unmanaged" by JPA
+  
+- **Why It's Necessary**:
+  ```java
+  if (!failureMessages.isEmpty()) {
+      int version = creditEntry.getVersion();        // Get current version
+      creditEntryRepository.detach(...);             // Remove from cache
+      creditEntry = getCreditEntry(...);             // Force DB read
+      isSucceeded = version == creditEntry.getVersion(); // Check if changed
+  }
+  ```
+  - Without detaching:
+     - Subsequent `getCreditEntry()` calls would return cached version
+     - Would miss concurrent updates by other transactions
+     - Could lead to lost updates or inconsistent data
+
+## Retry Handling for Optimistic Locking
+- **Implementation**: Uses a retry mechanism to handle optimistic locking failures during payment processing. This is applied to PaymentRequestMessageListenerImpl.
+- **Configuration**:
+  - `MAX_EXECUTION`: Maximum number of retry attempts (default: 100)
+    - Can be externalized to application configuration
+    - Higher values may indicate pessimistic locking would be more appropriate
+
+### Process Flow
+```java
+boolean result;
+int execution = 1;
+do {
+    try {
+        result = persistPayment(request);
+        execution++;
+    } catch (OptimisticLockingFailureException e) {
+        log.warn("Optimistic locking failed for order {}", e.getMessage());
+        result = false;
+    }
+} while (!result && execution < MAX_EXECUTION);
+```
+
+### Key Points
+- Uses do-while loop to ensure at least one execution
+- Catches `OptimisticLockingFailureException` to handle concurrent updates
+- If max retries exceeded, throws `PaymentApplicationServiceException`
+- In PaymentRequestKafkaListener, failed transactions trigger Kafka message redelivery (offset not committed)
+- See Kafka -> The Optimistic Locking Exception for more details.
