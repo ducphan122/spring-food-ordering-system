@@ -1,9 +1,8 @@
-package com.spring.food.ordering.system.order.service.domain.outbox.model.approval;
+package com.spring.food.ordering.system.domain.event.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,12 +10,13 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class OrderApprovalEventPayload {
+public class OrderPaymentEventPayload {
+
     @JsonProperty
     private String orderId;
 
     @JsonProperty
-    private String restaurantId;
+    private String customerId;
 
     @JsonProperty
     private BigDecimal price;
@@ -25,8 +25,5 @@ public class OrderApprovalEventPayload {
     private ZonedDateTime createdAt;
 
     @JsonProperty
-    private String restaurantOrderStatus;
-
-    @JsonProperty
-    private List<OrderApprovalEventProduct> products;
+    private String paymentOrderStatus;
 }

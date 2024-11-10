@@ -1,27 +1,29 @@
 package com.spring.food.ordering.system.payment.service.messaging.mapper;
 
+import com.spring.food.ordering.system.domain.event.payload.OrderPaymentEventPayload;
 import com.spring.food.ordering.system.domain.valueobject.PaymentOrderStatus;
-import com.spring.food.ordering.system.kafka.order.avro.model.PaymentRequestAvroModel;
 import com.spring.food.ordering.system.kafka.order.avro.model.PaymentResponseAvroModel;
 import com.spring.food.ordering.system.kafka.order.avro.model.PaymentStatus;
 import com.spring.food.ordering.system.payment.service.domain.dto.PaymentRequest;
 import com.spring.food.ordering.system.payment.service.domain.outbox.model.OrderEventPayload;
+import debezium.order.payment_outbox.Value;
+import java.time.Instant;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PaymentMessagingDataMapper {
 
-    public PaymentRequest paymentRequestAvroModelToPaymentRequest(PaymentRequestAvroModel paymentRequestAvroModel) {
+    public PaymentRequest paymentRequestAvroModelToPaymentRequest(
+            OrderPaymentEventPayload orderPaymentEventPayload, Value paymentRequestAvroModel) {
         return PaymentRequest.builder()
                 .id(paymentRequestAvroModel.getId())
                 .sagaId(paymentRequestAvroModel.getSagaId())
-                .customerId(paymentRequestAvroModel.getCustomerId())
-                .orderId(paymentRequestAvroModel.getOrderId())
-                .price(paymentRequestAvroModel.getPrice())
-                .createdAt(paymentRequestAvroModel.getCreatedAt())
-                .paymentOrderStatus(PaymentOrderStatus.valueOf(
-                        paymentRequestAvroModel.getPaymentOrderStatus().name()))
+                .customerId(orderPaymentEventPayload.getCustomerId())
+                .orderId(orderPaymentEventPayload.getOrderId())
+                .price(orderPaymentEventPayload.getPrice())
+                .createdAt(Instant.parse(paymentRequestAvroModel.getCreatedAt()))
+                .paymentOrderStatus(PaymentOrderStatus.valueOf(orderPaymentEventPayload.getPaymentOrderStatus()))
                 .build();
     }
 

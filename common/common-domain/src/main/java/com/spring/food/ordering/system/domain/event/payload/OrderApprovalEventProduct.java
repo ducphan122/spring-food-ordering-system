@@ -1,4 +1,4 @@
-package com.spring.food.ordering.system.order.service.domain.outbox.model.approval;
+package com.spring.food.ordering.system.domain.event.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

@@ -100,6 +100,7 @@ curl --location --request POST 'localhost:8083/connectors' \
       }
  }'
 
+sleep 2
 curl --location --request POST 'localhost:8083/connectors' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -122,7 +123,7 @@ curl --location --request POST 'localhost:8083/connectors' \
       "auto.register.schemas": false
       }
  }'
-
+sleep 2
 curl --location --request POST 'localhost:8083/connectors' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -145,7 +146,7 @@ curl --location --request POST 'localhost:8083/connectors' \
       "auto.register.schemas": false
       }
  }'
-
+sleep 2
 curl --location --request POST 'localhost:8083/connectors' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -168,6 +169,21 @@ curl --location --request POST 'localhost:8083/connectors' \
       "auto.register.schemas": false
       }
  }'
+
+echo "Check debezium connectors"
+expected_connectors=("order-restaurant-connector" "payment-order-connector" "order-payment-connector" "restaurant-order-connector")
+actual_connectors=$(curl -s http://localhost:8083/connectors)
+
+# Check if all expected connectors are present
+for connector in "${expected_connectors[@]}"; do
+    if ! echo "$actual_connectors" | jq -e ".[] | select(. == \"$connector\")" > /dev/null; then
+        echo "Warning: Connector '$connector' is missing!"
+        echo "Current connectors: $actual_connectors"
+        exit 1
+    fi
+done
+
+echo "All connectors successfully created and present"
 
 echo "Start-up completed"
 

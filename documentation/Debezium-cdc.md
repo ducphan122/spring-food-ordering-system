@@ -130,7 +130,7 @@ We need to download the required jars and add them to the Debezium connector con
 
 6. **Schema Management with Avro**:  
    - In oder to use avro serialization, we need to get the avro schema from the schema registry and save it as a .avsc file in the `kafka-model/resources/avro` folder, then mvn install to generate the java classes.
-   - See [Readme.md] Installation (till step 4). Then open dbeaver and insert using debezium_insert.sql. This will insert data into the outbox tables. As we have started the debezium connector, the data will be captured and sent to kafka. Then the avro schema will be generated and accessible via the Schema Registry API.
+   - See [Readme.md] Installation (till step 4). Then open dbeaver and insert using debezium_insert.sql. This will insert data into the outbox tables. As we have started the debezium connector, the data will be captured and sent to kafka. Then the avro schema will be generated and accessible via the Schema Registry API. Use this to copy the schema as save it as .avsc file. If you have done it, skip this step.
    - **Schema Retrieval and Storage**: Retrieves and saves the Avro schemas for each table as `.avsc` files in the `kafka-model avro` folder. Ex: Make GET request to http://localhost:8081/subjects/debezium.order.payment_outbox-value/versions/latest/schema. We need to make 4 requests to get all 4 schemas. Use localhost:9000 to get the topic name 
 
 7. **Manual Topic Creation (Optional)**:  

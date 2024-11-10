@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.food.ordering.system.domain.event.payload.OrderPaymentEventPayload;
 import com.spring.food.ordering.system.domain.valueobject.*;
 import com.spring.food.ordering.system.order.service.domain.dto.create.CreateOrderCommand;
 import com.spring.food.ordering.system.order.service.domain.dto.create.CreateOrderResponse;
@@ -18,7 +19,6 @@ import com.spring.food.ordering.system.order.service.domain.entity.Product;
 import com.spring.food.ordering.system.order.service.domain.entity.Restaurant;
 import com.spring.food.ordering.system.order.service.domain.exception.OrderDomainException;
 import com.spring.food.ordering.system.order.service.domain.mapper.OrderDataMapper;
-import com.spring.food.ordering.system.order.service.domain.outbox.model.payment.OrderPaymentEventPayload;
 import com.spring.food.ordering.system.order.service.domain.outbox.model.payment.OrderPaymentOutboxMessage;
 import com.spring.food.ordering.system.order.service.domain.ports.input.service.OrderApplicationService;
 import com.spring.food.ordering.system.order.service.domain.ports.output.repository.CustomerRepository;

@@ -1,5 +1,8 @@
 package com.spring.food.ordering.system.order.service.domain.mapper;
 
+import com.spring.food.ordering.system.domain.event.payload.OrderApprovalEventPayload;
+import com.spring.food.ordering.system.domain.event.payload.OrderApprovalEventProduct;
+import com.spring.food.ordering.system.domain.event.payload.OrderPaymentEventPayload;
 import com.spring.food.ordering.system.domain.valueobject.*;
 import com.spring.food.ordering.system.order.service.domain.dto.create.CreateOrderCommand;
 import com.spring.food.ordering.system.order.service.domain.dto.create.CreateOrderResponse;
@@ -10,9 +13,6 @@ import com.spring.food.ordering.system.order.service.domain.entity.*;
 import com.spring.food.ordering.system.order.service.domain.event.OrderCancelledEvent;
 import com.spring.food.ordering.system.order.service.domain.event.OrderCreatedEvent;
 import com.spring.food.ordering.system.order.service.domain.event.OrderPaidEvent;
-import com.spring.food.ordering.system.order.service.domain.outbox.model.approval.OrderApprovalEventPayload;
-import com.spring.food.ordering.system.order.service.domain.outbox.model.approval.OrderApprovalEventProduct;
-import com.spring.food.ordering.system.order.service.domain.outbox.model.payment.OrderPaymentEventPayload;
 import com.spring.food.ordering.system.order.service.domain.valueobject.StreetAddress;
 import java.util.List;
 import java.util.UUID;

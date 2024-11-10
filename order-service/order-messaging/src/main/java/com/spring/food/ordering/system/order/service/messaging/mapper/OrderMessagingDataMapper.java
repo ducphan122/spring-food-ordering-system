@@ -1,12 +1,13 @@
 package com.spring.food.ordering.system.order.service.messaging.mapper;
 
+import com.spring.food.ordering.system.domain.event.payload.OrderApprovalEventPayload;
+import com.spring.food.ordering.system.domain.event.payload.OrderPaymentEventPayload;
 import com.spring.food.ordering.system.domain.event.payload.PaymentOrderEventPayload;
+import com.spring.food.ordering.system.domain.event.payload.RestaurantOrderEventPayload;
 import com.spring.food.ordering.system.kafka.order.avro.model.*;
 import com.spring.food.ordering.system.order.service.domain.dto.message.CustomerModel;
 import com.spring.food.ordering.system.order.service.domain.dto.message.PaymentResponse;
 import com.spring.food.ordering.system.order.service.domain.dto.message.RestaurantApprovalResponse;
-import com.spring.food.ordering.system.order.service.domain.outbox.model.approval.OrderApprovalEventPayload;
-import com.spring.food.ordering.system.order.service.domain.outbox.model.payment.OrderPaymentEventPayload;
 import debezium.payment.order_outbox.Value;
 import java.time.Instant;
 import java.util.UUID;
@@ -33,18 +34,17 @@ public class OrderMessagingDataMapper {
     }
 
     public RestaurantApprovalResponse approvalResponseAvroModelToApprovalResponse(
-            RestaurantApprovalResponseAvroModel restaurantApprovalResponseAvroModel) {
+            RestaurantOrderEventPayload restaurantOrderEventPayload,
+            debezium.restaurant.order_outbox.Value restaurantApprovalResponseAvroModel) {
         return RestaurantApprovalResponse.builder()
                 .id(restaurantApprovalResponseAvroModel.getId())
                 .sagaId(restaurantApprovalResponseAvroModel.getSagaId())
-                .restaurantId(restaurantApprovalResponseAvroModel.getRestaurantId())
-                .orderId(restaurantApprovalResponseAvroModel.getOrderId())
-                .createdAt(restaurantApprovalResponseAvroModel.getCreatedAt())
+                .restaurantId(restaurantOrderEventPayload.getRestaurantId())
+                .orderId(restaurantOrderEventPayload.getOrderId())
+                .createdAt(Instant.parse(restaurantApprovalResponseAvroModel.getCreatedAt()))
                 .orderApprovalStatus(com.spring.food.ordering.system.domain.valueobject.OrderApprovalStatus.valueOf(
-                        restaurantApprovalResponseAvroModel
-                                .getOrderApprovalStatus()
-                                .name()))
-                .failureMessages(restaurantApprovalResponseAvroModel.getFailureMessages())
+                        restaurantOrderEventPayload.getOrderApprovalStatus()))
+                .failureMessages(restaurantOrderEventPayload.getFailureMessages())
                 .build();
     }
 
