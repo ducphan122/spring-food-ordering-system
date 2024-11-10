@@ -1,12 +1,36 @@
+# CQRS Pattern
 - (CQRS): Separate read and write operations. Better performance on read part using right technology for reading, and preventing conflicts with update commands. Scale each part separately.
 - Eventual Consistency means that the system will eventually reach a consistent state: any updates made on a distributed system will eventually be reflected to all nodes
 - Once the write operation is persisted, an event is stored in event-store.
   - Event-store is used to store data as immutable events.
 - Events can be replayed multiple times based on requirements to create different type of query store. See [Event-Store and Replayability in CQRS](#benefits-of-multiple-query-stores)
 
-## Move from materialized view cqrs
+## Move from materialized view cqrs: From Shared Schema to Service Isolation 
 - Current implementation is using materialized view. For example, in order-service, we are getting customer data via the materialized view customer schema. This cross schema query is not efficient.
 - Now, instead of using materialized view, we will use cqrs to store customer data in order-service.
+
+**This is example of customer only**
+Current 
+├── customer schema
+│   ├── customer table (source)
+│   └── order_customer_m_view (materialized view)
+└── order schema
+    └── (order related tables)
+
+-> Oder will use materialized view from customer schema to get customer data, but this is not scalable and coupled
+
+Future
+- Update customer data through events rather than direct database access. Each service will have its own database -> achieve true "database per service"
+├── Customer Service
+│   └── Customer Database
+├── Order Service
+│   └── Order Database (including customer data table)
+└── Kafka (for event sourcing)
+
+**This is example of restaurant only**
+order_restaurant_m_view is a materialized view in restaurant schema, order service will use this to get restaurant data. This materialized view will have restaurantId and productId as composite key, the data structure represents a restaurant-product relationship where:
+- One restaurant can have many products
+- Each row represents a unique restaurant-product combination
 
 ## Example
 - In this project, after saving the customer object in customer local database, we will create and send the customer created event into kafka to hold the event
