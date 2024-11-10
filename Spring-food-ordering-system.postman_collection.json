@@ -1,0 +1,336 @@
+{
+	"info": {
+		"_postman_id": "eaea0472-3aba-4480-b8be-487866a5fa0d",
+		"name": "Spring-food-ordering-system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15814854",
+		"_collection_link": "https://crimson-eclipse-967234.postman.co/workspace/Personal-Workspace~85a1380a-4bb8-4ea7-a106-62cc03898d2c/collection/15814854-eaea0472-3aba-4480-b8be-487866a5fa0d?action=share&source=collection_link&creator=15814854"
+	},
+	"item": [
+		{
+			"name": "POST orders",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjQG1haWwuY29tOmJldmVyYWdl",
+						"description": "duc@mail.com",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjMUBtYWlsLmNvbTpiZXZlcmFnZQ==",
+						"description": "duc1@mail.com",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb41\",\r\n  \"restaurantId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb45\",\r\n  \"address\": {\r\n    \"street\": \"street_1\",\r\n    \"postalCode\": \"1000AB\",\r\n    \"city\": \"Amsterdam\"\r\n  },\r\n  \"price\": 200.00,\r\n  \"items\": [\r\n    {\r\n      \"productId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb48\",\r\n      \"quantity\": 1,\r\n      \"price\": 50.00,\r\n      \"subTotal\": 50.00\r\n    },\r\n    {\r\n      \"productId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb48\",\r\n      \"quantity\": 3,\r\n      \"price\": 50.00,\r\n      \"subTotal\": 150.00\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8181/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST orders product not available failed",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjQG1haWwuY29tOmJldmVyYWdl",
+						"description": "duc@mail.com",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjMUBtYWlsLmNvbTpiZXZlcmFnZQ==",
+						"description": "duc1@mail.com",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb41\",\r\n  \"restaurantId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb45\",\r\n  \"address\": {\r\n    \"street\": \"street_1\",\r\n    \"postalCode\": \"1000AB\",\r\n    \"city\": \"Amsterdam\"\r\n  },\r\n  \"price\": 25.00,\r\n  \"items\": [\r\n    {\r\n      \"productId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb47\",\r\n      \"quantity\": 1,\r\n      \"price\": 25.00,\r\n      \"subTotal\": 25.00\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8181/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST orders not enough credit failed",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjQG1haWwuY29tOmJldmVyYWdl",
+						"description": "duc@mail.com",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjMUBtYWlsLmNvbTpiZXZlcmFnZQ==",
+						"description": "duc1@mail.com",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb41\",\r\n  \"restaurantId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb45\",\r\n  \"address\": {\r\n    \"street\": \"street_1\",\r\n    \"postalCode\": \"1000AB\",\r\n    \"city\": \"Amsterdam\"\r\n  },\r\n  \"price\": 100000.00,\r\n  \"items\": [\r\n    {\r\n      \"productId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb48\",\r\n      \"quantity\": 1000,\r\n      \"price\": 50.00,\r\n      \"subTotal\": 50000.00\r\n    },\r\n    {\r\n      \"productId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb48\",\r\n      \"quantity\": 1000,\r\n      \"price\": 50.00,\r\n      \"subTotal\": 50000.00\r\n    }\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8181/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST topUP Credit",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjQG1haWwuY29tOmJldmVyYWdl",
+						"description": "duc@mail.com",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjMUBtYWlsLmNvbTpiZXZlcmFnZQ==",
+						"description": "duc1@mail.com",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb41\",\r\n  \"amount\": 1000.00\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8182/payments/top-up",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8182",
+					"path": [
+						"payments",
+						"top-up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST customers",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjQG1haWwuY29tOmJldmVyYWdl",
+						"description": "duc@mail.com",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjMUBtYWlsLmNvbTpiZXZlcmFnZQ==",
+						"description": "duc1@mail.com",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerId\": \"d215b5f8-0249-4dc5-89a3-51fd148cfb41\",\r\n  \"username\": \"user_1\",\r\n  \"firstName\": \"First\",\r\n  \"lastName\": \"User\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8184/customers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8184",
+					"path": [
+						"customers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET ordersTracking",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjQG1haWwuY29tOmJldmVyYWdl",
+						"description": "duc@mail.com",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZHVjMUBtYWlsLmNvbTpiZXZlcmFnZQ==",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8181/orders/f399d773-c9bf-4dce-bf8b-4b61fc653273",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8181",
+					"path": [
+						"orders",
+						"f399d773-c9bf-4dce-bf8b-4b61fc653273"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8083/connectors",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/connectors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8083/connectors",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/connectors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8083/connectors Copy",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/connectors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8081/schema",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/connectors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"connectors"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
