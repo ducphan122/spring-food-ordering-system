@@ -4,12 +4,21 @@
  * DO NOT EDIT DIRECTLY
  */
 package com.spring.food.ordering.system.kafka.order.avro.model;
+
 @org.apache.avro.specific.AvroGenerated
 public enum PaymentOrderStatus implements org.apache.avro.generic.GenericEnumSymbol<PaymentOrderStatus> {
-  PENDING, CANCELLED  ;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"enum\",\"name\":\"PaymentOrderStatus\",\"namespace\":\"com.spring.food.ordering.system.kafka.order.avro.model\",\"symbols\":[\"PENDING\",\"CANCELLED\"]}");
-  public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
+    PENDING,
+    CANCELLED;
+    public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser()
+            .parse(
+                    "{\"type\":\"enum\",\"name\":\"PaymentOrderStatus\",\"namespace\":\"com.spring.food.ordering.system.kafka.order.avro.model\",\"symbols\":[\"PENDING\",\"CANCELLED\"]}");
 
-  @Override
-  public org.apache.avro.Schema getSchema() { return SCHEMA$; }
+    public static org.apache.avro.Schema getClassSchema() {
+        return SCHEMA$;
+    }
+
+    @Override
+    public org.apache.avro.Schema getSchema() {
+        return SCHEMA$;
+    }
 }
