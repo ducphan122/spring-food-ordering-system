@@ -16,7 +16,7 @@ CREATE TABLE
 DROP TABLE IF EXISTS "payment".credit_entry CASCADE;
 
 CREATE TABLE
-	"payment".credit_entry (id uuid NOT NULL, customer_id uuid NOT NULL, total_credit_amount numeric(10, 2) NOT NULL, CONSTRAINT credit_entry_pkey PRIMARY KEY (id));
+	"payment".credit_entry (id uuid NOT NULL, customer_id uuid NOT NULL, total_credit_amount numeric(10, 2) NOT NULL, version integer NOT NULL, CONSTRAINT credit_entry_pkey PRIMARY KEY (id));
 
 DROP TYPE IF EXISTS transaction_type;
 

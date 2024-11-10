@@ -1,14 +1,16 @@
 package com.spring.food.ordering.system.payment.service.domain.entity;
 
-import com.spring.food.ordering.system.domain.entity.AggregateRoot;
+import com.spring.food.ordering.system.domain.entity.BaseEntity;
 import com.spring.food.ordering.system.domain.valueobject.CustomerId;
 import com.spring.food.ordering.system.domain.valueobject.Money;
 import com.spring.food.ordering.system.payment.service.domain.valueobject.CreditEntryId;
 
-public class CreditEntry extends AggregateRoot<CreditEntryId> {
+public class CreditEntry extends BaseEntity<CreditEntryId> {
 
     private final CustomerId customerId;
     private Money totalCreditAmount;
+
+    private int version;
 
     public void addCreditAmount(Money amount) {
         totalCreditAmount = totalCreditAmount.add(amount);
@@ -22,6 +24,7 @@ public class CreditEntry extends AggregateRoot<CreditEntryId> {
         setId(builder.creditEntryId);
         customerId = builder.customerId;
         totalCreditAmount = builder.totalCreditAmount;
+        version = builder.version;
     }
 
     public static Builder builder() {
@@ -36,10 +39,15 @@ public class CreditEntry extends AggregateRoot<CreditEntryId> {
         return totalCreditAmount;
     }
 
+    public int getVersion() {
+        return version;
+    }
+
     public static final class Builder {
         private CreditEntryId creditEntryId;
         private CustomerId customerId;
         private Money totalCreditAmount;
+        private int version;
 
         private Builder() {}
 
@@ -55,6 +63,11 @@ public class CreditEntry extends AggregateRoot<CreditEntryId> {
 
         public Builder totalCreditAmount(Money val) {
             totalCreditAmount = val;
+            return this;
+        }
+
+        public Builder version(int val) {
+            version = val;
             return this;
         }
 

@@ -9,4 +9,6 @@ public interface CreditEntryRepository {
     CreditEntry save(CreditEntry creditEntry);
 
     Optional<CreditEntry> findByCustomerId(CustomerId customerId);
+
+    void detach(CustomerId customerId);
 }

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.*;
+import org.springframework.data.annotation.Version;
 
 @Getter
 @Setter
@@ -22,6 +23,9 @@ public class CreditEntryEntity {
 
     private UUID customerId;
     private BigDecimal totalCreditAmount;
+
+    @Version
+    private int version;
 
     @Override
     public boolean equals(Object o) {
