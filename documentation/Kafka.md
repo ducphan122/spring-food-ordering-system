@@ -39,3 +39,16 @@
 - **Single Item vs. List Processing**: 
   - Assess whether to use a single-item listener or a list of items based on expected failure frequency.
   - In cases where failures are rare, processing a list (batch) is more efficient; otherwise, single-item processing might be preferable.
+
+## Future Improvements
+- In the future, we can implement a dead letter queue for failed messages for PaymentRequestKafkaListener
+- **Purpose**: Handles messages that fail processing after maximum retries
+- **Implementation**: Configure a Dead Letter Topic (DLT) in the Kafka listener container factory
+
+### Key Features
+- Failed messages are automatically published to a DLT after retries exhaust
+- Maintains original message metadata (headers, key, partition)
+- Enables:
+  - Manual review of failed messages
+  - Monitoring of processing failures
+  - Reprocessing capabilities after issue resolution
