@@ -76,3 +76,49 @@ Notes: the $1 in the script allows us to pass in the zookeeper host as parameter
 9. Delete kafka helm chart and kafka client deployment
 - helm uninstall local-confluent-kafka
 - kubectl delete -f kafka-client.yml -f postgres-deployment.yml -f application-deployment-local.yml
+
+
+## Horizontal Pod Autoscaler (HPA) Implementation
+
+* HorizontalPodAutoscaler was added for multiple services (order, payment, restaurant, and customer)
+* Configuration set with name "order-deployment-hpa" in default namespace
+* Scaling parameters:
+  - Minimum replicas: 2
+  - Maximum replicas: 4
+  - CPU utilization target: 85%
+
+### Database Initialization Changes
+
+* Disabled data source initialization for multiple instances
+* Changed SPRING_DATASOURCE_INITIALIZATION-MODE to "never"
+* This prevents multiple instances from trying to initialize the database simultaneously
+* Environment variable added to all services to prevent startup error
+
+Database initialization in Spring Boot is a process where the application sets up database schemas and loads initial data
+By default, Spring Boot attempts to initialize the database when the application starts
+This can cause issues in multi-instance deployments where multiple instances try to initialize the database simultaneously
+
+1. Multiple Instance Problems:
+  - When running multiple instances, concurrent initialization attempts can cause conflicts
+  - Database locks can occur when multiple instances try to create schemas simultaneously
+  - Data inconsistency can arise from parallel data loading
+
+2. Production Considerations:
+  - Database initialization should typically be done only once during initial deployment
+  - Production environments should use proper database migration tools (like Flyway or Liquibase)
+  - Schema and data should be managed through version-controlled migration scripts
+
+### Deployment Process
+
+* Updated application deployment files pushed to GitHub
+* Existing deployments deleted (except Kafka and Postgres)
+* New deployment applied with horizontal scaling configurations
+* Verification showed multiple instances (2 pods per service)
+* Single LoadBalancer IP maintained for each service with load distribution
+
+### Key Technical Points
+
+* Load balancing remains transparent to external clients
+* Each service maintains a single external IP despite multiple instances
+* Scaling based on CPU utilization (configurable to use other metrics)
+* Proper cleanup process to avoid unnecessary cloud resource costs
