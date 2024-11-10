@@ -231,14 +231,5 @@ This is why it's called a "push-based" approach, as opposed to the previous "pul
 - **OrderEventPayload**: Use `OrderEventPayload` from `payment domain` module to map necessary fields, renaming it to `PaymentOrderEventPayload` to align with the payment-to-order data flow.
 - **PaymentResponse Mapping**: Update `OrderMessagingDataMapper` to map data from `PaymentOrderEventPayload` to `PaymentResponse`, including fields like ID, saga ID, and timestamps.
 
-### Final Cleanup
-- **Data Mapper Cleanup**: Remove unused methods from `OrderMessagingDataMapper`.
-- **Method Renaming**: Rename methods to reflect the removal of publish operations.
-- **Testing Cleanup**: Remove publisher mocks from `OrderTestConfiguration` after the publisher code deletion.
-  
-### Similar Changes for Other Services
-- Plan similar CDC and listener updates for **restaurant-service** and **payment-service** in the following lectures.
 
----
-
-This comprehensive update integrates CDC with Debezium into the existing microservices architecture, removing redundant polling mechanisms and configuring Kafka listeners to efficiently handle database change events directly. The lecture concludes with considerations for handling failure scenarios and ensuring robust message processing.
+- Kafka now not responsible for publishing messages, it's only responsible for receiving messages. The publishing is now handled by the Debezium CDC. Therefore, the outbox status is no longer needed, because there is no scheduler needed to fetch message that has outboxStatus STARTED, and there is no callback added to kafka send method to update the outboxStatus. Everything now is simple, whenever a service insert a new entry to its outbox table, the Debezium CDC will capture the change and send it to the corresponding topic in Kafka. Then the listener will consume the message from the topic and process it.

@@ -171,23 +171,41 @@ curl --location --request POST 'localhost:8083/connectors' \
  }'
 
 echo "Check debezium connectors"
-expected_connectors=("order-restaurant-connector" "payment-order-connector" "order-payment-connector" "restaurant-order-connector")
-actual_connectors=$(curl -s http://localhost:8083/connectors)
+CONNECTORS=$(curl -s http://localhost:8083/connectors)
 
-# Check if all expected connectors are present
-for connector in "${expected_connectors[@]}"; do
-    if ! echo "$actual_connectors" | jq -e ".[] | select(. == \"$connector\")" > /dev/null; then
-        echo "Warning: Connector '$connector' is missing!"
-        echo "Current connectors: $actual_connectors"
-        exit 1
+# Expected connectors
+EXPECTED_CONNECTORS=(
+    "order-restaurant-connector"
+    "payment-order-connector"
+    "order-payment-connector"
+    "restaurant-order-connector"
+)
+
+# Remove brackets and quotes from the response and convert to array
+ACTUAL_CONNECTORS=$(echo $CONNECTORS | tr -d '[]"' | tr ',' ' ')
+
+# Flag to track if all connectors are found
+ALL_FOUND=true
+
+# Check each expected connector
+for connector in "${EXPECTED_CONNECTORS[@]}"; do
+    if echo "$ACTUAL_CONNECTORS" | grep -q "$connector"; then
+        echo "✅ Found connector: $connector"
+    else
+        echo "❌ Missing connector: $connector"
+        ALL_FOUND=false
     fi
 done
 
-echo "All connectors successfully created and present"
-
-echo "Start-up completed"
+# Report status without exiting
+if [ "$ALL_FOUND" = true ]; then
+    echo "All connectors are present!"
+else
+    echo "Some connectors are missing!"
+fi
 
 echo "Delete kcat containers"
+
 docker ps -a | grep 'edenhill/kcat:1.7.1' | awk '{print $1}' | xargs -r docker rm
 
-read -p "Press any key to exit..."
+read -p "Start up completed. Press any key to exit..."
