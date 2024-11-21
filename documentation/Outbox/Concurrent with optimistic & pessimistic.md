@@ -91,6 +91,7 @@
      - Could lead to lost updates or inconsistent data
 
 ## Retry Handling for Optimistic Locking
+- Branch: debezium-cdc-optimistic-locking-credit-entry
 - **Implementation**: Uses a retry mechanism to handle optimistic locking failures during payment processing. This is applied to PaymentRequestMessageListenerImpl.
 - **Configuration**:
   - `MAX_EXECUTION`: Maximum number of retry attempts (default: 100)

@@ -11,7 +11,7 @@
 
 In a database, optimistic locking is a strategy used to ensure data consistency when multiple transactions are trying to update the same data concurrently. It works by checking if the data has been modified by another transaction before committing the changes. This is typically implemented using a version number or timestamp.
 
-In the SQL schema, the `payment_outbox` and `restaurant_approval_outbox` tables have a `version` column, which is likely used for optimistic locking. The idea is that when a transaction reads a row, it also reads the version number. When it tries to update the row, it checks if the version number is the same as when it was read. If the version number has changed, it means another transaction has modified the row, and the current transaction should be aborted or retried.
+In the SQL schema of order-service, the `payment_outbox` and `restaurant_approval_outbox` tables have a `version` column, which is likely used for optimistic locking. The idea is that when a transaction reads a row, it also reads the version number. When it tries to update the row, it checks if the version number is the same as when it was read. If the version number has changed, it means another transaction has modified the row, and the current transaction should be aborted or retried.
 
 We might need to comment out the unique index on `saga_id` and `saga_status` because these indexes enforce uniqueness constraints that can interfere with the optimistic locking mechanism. If the unique index is in place, it might prevent certain updates that are necessary for testing or observing the behavior of optimistic locking, especially if the updates involve changing the `saga_status` or `saga_id` in a way that would violate the uniqueness constraint.
 
